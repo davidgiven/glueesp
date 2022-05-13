@@ -28,41 +28,44 @@
  *			  VECTOR DEFINITIONS
  *
  ******************************************************************************/
-typedef void *	Vector;   	/* Basic type */
-typedef void *	Address;
+typedef void* Vector; /* Basic type */
+typedef void* Address;
 
-#define NullVector	((Vector)NULL)
+#define NullVector ((Vector)NULL)
 
-typedef enum {
-    ADJUST_MULTIPLY,	    	/* Expand by multiplying current max by the
-				 * adjustment size */
-    ADJUST_ADD,	  	    	/* Expand by adding the adjustment size to
-				 * the current maximum */
-}	    	  Vector_Adjust;
+typedef enum
+{
+    ADJUST_MULTIPLY, /* Expand by multiplying current max by the
+                      * adjustment size */
+    ADJUST_ADD,      /* Expand by adding the adjustment size to
+                      * the current maximum */
+} Vector_Adjust;
 
-typedef struct {
-    char *  	  	data;	    /* The actual data */
-    int		  	num;	    /* Current number of elements (vector
-				     * length) */
-    int		  	max;	    /* Current maximum number (vector size) */
-    int		  	size;	    /* Size of each element */
-    Vector_Adjust 	adj;	    /* Type of adjustment needed for overflow*/
-    int			adjSize;    /* Size of adjustment to make */
+typedef struct
+{
+    char* data;        /* The actual data */
+    int num;           /* Current number of elements (vector
+                        * length) */
+    int max;           /* Current maximum number (vector size) */
+    int size;          /* Size of each element */
+    Vector_Adjust adj; /* Type of adjustment needed for overflow*/
+    int adjSize;       /* Size of adjustment to make */
 } VectorRec, *VectorPtr;
 
-#define VECTOR_END  -1          /* Position to pass to Vector_Add to add an
-                                 * element to the end of the vector */
+#define VECTOR_END                                 \
+    -1 /* Position to pass to Vector_Add to add an \
+        * element to the end of the vector */
 
-extern Vector   Vector_Create (int dataSize, Vector_Adjust adjustType,
-                               int adjustSize, int initialSize);
-extern void     Vector_Empty (Vector vector);
-extern void 	Vector_Truncate (Vector vector, int size);
-extern void     Vector_Destroy (Vector vector);
-extern Address  Vector_Data (Vector vector);
-extern int      Vector_Size (Vector vector);
-extern int      Vector_Length (Vector vector);
-extern void     Vector_Add (Vector vector, int offset, Address data);
-extern void     Vector_Insert (Vector vector, int offset, Address data);
-extern Boolean  Vector_Get (Vector vector, int offset, Address buf);
+extern Vector Vector_Create(
+    int dataSize, Vector_Adjust adjustType, int adjustSize, int initialSize);
+extern void Vector_Empty(Vector vector);
+extern void Vector_Truncate(Vector vector, int size);
+extern void Vector_Destroy(Vector vector);
+extern Address Vector_Data(Vector vector);
+extern int Vector_Size(Vector vector);
+extern int Vector_Length(Vector vector);
+extern void Vector_Add(Vector vector, int offset, Address data);
+extern void Vector_Insert(Vector vector, int offset, Address data);
+extern Boolean Vector_Get(Vector vector, int offset, Address buf);
 
 #endif /* _VECTOR_H_ */

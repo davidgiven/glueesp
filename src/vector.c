@@ -23,14 +23,13 @@
  *
  ***********************************************************************/
 #ifndef lint
-static char *rcsid =
-"$Id: vector.c,v 1.4 92/10/27 20:52:10 adam Exp $";
+static char* rcsid = "$Id: vector.c,v 1.4 92/10/27 20:52:10 adam Exp $";
 #endif lint
 
-#include    "glue.h"
-#include    "vector.h"
+#include "glue.h"
+#include "vector.h"
 
-#define DEFAULT_INITIAL_SIZE	10
+#define DEFAULT_INITIAL_SIZE 10
 
 /*-
  *-----------------------------------------------------------------------
@@ -45,18 +44,18 @@ static char *rcsid =
  *
  *-----------------------------------------------------------------------
  */
-Vector
-Vector_Create(int	    dataSize,	    /* Size of each element */
-	      Vector_Adjust adjustType,	    /* Way to expand when overflows */
-	      int	    adjustSize,	    /* Size of adjustment to make */
-	      int	    initialSize)    /* Initial size of vector */
+Vector Vector_Create(int dataSize, /* Size of each element */
+    Vector_Adjust adjustType,      /* Way to expand when overflows */
+    int adjustSize,                /* Size of adjustment to make */
+    int initialSize)               /* Initial size of vector */
 {
-    VectorPtr	  v;
+    VectorPtr v;
 
-    if (initialSize <= 0) {
-	initialSize = DEFAULT_INITIAL_SIZE;
+    if (initialSize <= 0)
+    {
+        initialSize = DEFAULT_INITIAL_SIZE;
     }
-    
+
     v = (VectorPtr)malloc(sizeof(VectorRec));
     v->data = (Address)malloc(initialSize * dataSize);
     v->num = 0;
@@ -81,10 +80,9 @@ Vector_Create(int	    dataSize,	    /* Size of each element */
  *
  *-----------------------------------------------------------------------
  */
-void
-Vector_Empty(Vector vector)
+void Vector_Empty(Vector vector)
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
     bzero(v->data, v->num * v->size);
     v->num = 0;
@@ -103,26 +101,27 @@ Vector_Empty(Vector vector)
  *
  *-----------------------------------------------------------------------
  */
-void
-Vector_Truncate(Vector 	vector,
-		int 	size)
+void Vector_Truncate(Vector vector, int size)
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
     /*
      * Make sure the vector is at least that long.
      */
-    if (v->num < size) {
-	Address 	element;
+    if (v->num < size)
+    {
+        Address element;
 
-	element = (Address)calloc(1, v->size);
-	Vector_Add(vector, size-1, element);
-	free(element);
-    } else if (v->num > size) {
-	/*
-	 * Zero out the elements beyond what is now the end.
-	 */
-	bzero(v->data + (size * v->size), (v->num - size) * v->size);
+        element = (Address)calloc(1, v->size);
+        Vector_Add(vector, size - 1, element);
+        free(element);
+    }
+    else if (v->num > size)
+    {
+        /*
+         * Zero out the elements beyond what is now the end.
+         */
+        bzero(v->data + (size * v->size), (v->num - size) * v->size);
     }
 
     /*
@@ -144,13 +143,12 @@ Vector_Truncate(Vector 	vector,
  *
  *-----------------------------------------------------------------------
  */
-void
-Vector_Destroy(Vector	vector)
+void Vector_Destroy(Vector vector)
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
-    free((char *)v->data);
-    free((char *)v);
+    free((char*)v->data);
+    free((char*)v);
 }
 
 /*-
@@ -168,8 +166,7 @@ Vector_Destroy(Vector	vector)
  *
  *-----------------------------------------------------------------------
  */
-Address
-Vector_Data(Vector  vector)
+Address Vector_Data(Vector vector)
 {
     return ((VectorPtr)vector)->data;
 }
@@ -188,8 +185,7 @@ Vector_Data(Vector  vector)
  *
  *-----------------------------------------------------------------------
  */
-int
-Vector_Size(Vector  vector)
+int Vector_Size(Vector vector)
 {
     return ((VectorPtr)vector)->max * ((VectorPtr)vector)->size;
 }
@@ -209,8 +205,7 @@ Vector_Size(Vector  vector)
  *
  *-----------------------------------------------------------------------
  */
-int
-Vector_Length(Vector	vector)
+int Vector_Length(Vector vector)
 {
     return ((VectorPtr)vector)->num;
 }
@@ -229,41 +224,47 @@ Vector_Length(Vector	vector)
  *
  *-----------------------------------------------------------------------
  */
-void
-Vector_Add(Vector   vector, /* Vector to change */
-	   int	    offset, /* Place at which to store the data */
-	   Address  data)   /* Pointer to data to store */
+void Vector_Add(Vector vector, /* Vector to change */
+    int offset,                /* Place at which to store the data */
+    Address data)              /* Pointer to data to store */
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
-    if (offset < 0) {
-	offset = v->num;
+    if (offset < 0)
+    {
+        offset = v->num;
     }
-    if (offset >= v->max) {
-	int oldMax = v->max;
-	
-	if (v->adj == ADJUST_MULTIPLY) {
-	    do {
-		v->max *= v->adjSize;
-	    } while (offset >= v->max);
-	} else {
-	    do {
-		v->max += v->adjSize;
-	    } while (offset >= v->max);
-	}
-	v->data = (Address)realloc(v->data, v->max * v->size);
-	if (v->data == (Address)NULL) {
-	    printf("Out of memory in Vector_Add\n");
-	    exit(1);
-	}
-	bzero(v->data + (oldMax * v->size),
-	      (v->max - oldMax) * v->size);
+    if (offset >= v->max)
+    {
+        int oldMax = v->max;
+
+        if (v->adj == ADJUST_MULTIPLY)
+        {
+            do
+            {
+                v->max *= v->adjSize;
+            } while (offset >= v->max);
+        }
+        else
+        {
+            do
+            {
+                v->max += v->adjSize;
+            } while (offset >= v->max);
+        }
+        v->data = (Address)realloc(v->data, v->max * v->size);
+        if (v->data == (Address)NULL)
+        {
+            printf("Out of memory in Vector_Add\n");
+            exit(1);
+        }
+        bzero(v->data + (oldMax * v->size), (v->max - oldMax) * v->size);
     }
 
-    if (offset >= v->num) {
-	bzero(v->data + (v->num * v->size),
-	      (offset + 1 - v->num) * v->size);
-	v->num = offset + 1;
+    if (offset >= v->num)
+    {
+        bzero(v->data + (v->num * v->size), (offset + 1 - v->num) * v->size);
+        v->num = offset + 1;
     }
     bcopy(data, v->data + offset * v->size, v->size);
 }
@@ -282,54 +283,61 @@ Vector_Add(Vector   vector, /* Vector to change */
  *
  *-----------------------------------------------------------------------
  */
-void
-Vector_Insert(Vector	vector,
-	      int	offset,
-	      Address	data)
+void Vector_Insert(Vector vector, int offset, Address data)
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
-    if (offset >= v->num) {
-	Vector_Add(vector, offset, data);
-    } else {
-	if (v->num == v->max) {
-	    /*
-	     * If we have to expand the vector to insert this element anyway,
-	     * simply allocate a new data array straight out and copy the data
-	     * over in two pieces, leaving room in the middle for the new element.
-	     */
-	    Address	  newData;
-	    
-	    if (v->adj == ADJUST_MULTIPLY) {
-		v->max *= v->adjSize;
-	    } else {
-		v->max += v->adjSize;
-	    }
-	    
-	    newData = (Address)malloc(v->max * v->size);
-	    bcopy(v->data, newData, offset * v->size);
-	    bcopy(v->data + offset * v->size,
-		  (char *)newData + (offset + 1) * v->size,
-		  (v->num - offset) * v->size);
-	    free((char *)v->data);
-	    v->data = newData;
-	} else {
-	    /*
-	     * No need to expand the vector, just shift all the elements up one
-	     * slot.
-	     */
-	    bcopy(v->data + offset * v->size,
-		  v->data + (offset + 1) * v->size,
-		  (v->num - offset) * v->size);
-	}
-	/*
-	 * Copy the new element in
-	 */
-	bcopy(data, v->data + offset * v->size, v->size);
-	v->num += 1;
+    if (offset >= v->num)
+    {
+        Vector_Add(vector, offset, data);
+    }
+    else
+    {
+        if (v->num == v->max)
+        {
+            /*
+             * If we have to expand the vector to insert this element anyway,
+             * simply allocate a new data array straight out and copy the data
+             * over in two pieces, leaving room in the middle for the new
+             * element.
+             */
+            Address newData;
+
+            if (v->adj == ADJUST_MULTIPLY)
+            {
+                v->max *= v->adjSize;
+            }
+            else
+            {
+                v->max += v->adjSize;
+            }
+
+            newData = (Address)malloc(v->max * v->size);
+            bcopy(v->data, newData, offset * v->size);
+            bcopy(v->data + offset * v->size,
+                (char*)newData + (offset + 1) * v->size,
+                (v->num - offset) * v->size);
+            free((char*)v->data);
+            v->data = newData;
+        }
+        else
+        {
+            /*
+             * No need to expand the vector, just shift all the elements up one
+             * slot.
+             */
+            bcopy(v->data + offset * v->size,
+                v->data + (offset + 1) * v->size,
+                (v->num - offset) * v->size);
+        }
+        /*
+         * Copy the new element in
+         */
+        bcopy(data, v->data + offset * v->size, v->size);
+        v->num += 1;
     }
 }
-	
+
 /*-
  *-----------------------------------------------------------------------
  * Vector_Get --
@@ -343,18 +351,17 @@ Vector_Insert(Vector	vector,
  *
  *-----------------------------------------------------------------------
  */
-int
-Vector_Get(Vector   vector,
-	   int	    offset,
-	   Address  buf)
+int Vector_Get(Vector vector, int offset, Address buf)
 {
-    register VectorPtr	v = (VectorPtr)vector;
+    register VectorPtr v = (VectorPtr)vector;
 
-    if ((offset >= v->num) || (offset < 0)) {
-	return(0);
-    } else {
-	bcopy(v->data + offset * v->size, buf, v->size);
-	return(1);
+    if ((offset >= v->num) || (offset < 0))
+    {
+        return (0);
+    }
+    else
+    {
+        bcopy(v->data + offset * v->size, buf, v->size);
+        return (1);
     }
 }
-

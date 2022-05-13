@@ -23,7 +23,7 @@
 #ifndef _MSOBJ_H_
 #define _MSOBJ_H_
 
-#include    "vector.h"
+#include "vector.h"
 
 /******************************************************************************
  *
@@ -31,12 +31,12 @@
  *
  ******************************************************************************/
 
-#define MO_HEADER_SIZE	3   	/* Number of bytes in an object record header */
+#define MO_HEADER_SIZE 3 /* Number of bytes in an object record header */
 
 /*
  * Bad record. No data. Internal use only (not actually in a file)
  */
-#define MO_ERROR    0x00
+#define MO_ERROR 0x00
 
 /*
  * Start of module. Followed by:
@@ -44,7 +44,7 @@
  *	- module name (counted ascii)
  *	- checksum (byte)
  */
-#define MO_THEADR   0x80
+#define MO_THEADR 0x80
 
 /*
  * Comment. Followed by:
@@ -54,26 +54,30 @@
  *	- variable-length data (length implied by overall record length)
  *	- checksum (byte)
  */
-#define MO_COMENT   0x88
+#define MO_COMENT 0x88
 
 /* Comment attributes */
-#define CA_NO_PURGE 	0x80	/* Don't ever delete this record */
-#define CA_NO_LIST  	0x40	/* Don't list this record's contents */
+#define CA_NO_PURGE 0x80 /* Don't ever delete this record */
+#define CA_NO_LIST 0x40  /* Don't list this record's contents */
 
 /* Comment classes */
-#define CC_TRANSLATOR	0x00	/* data is name of translator that produced
-				 * the object module */
-#define CC_COPYRIGHT	0x01	/* data is copyright notice */
-#define CC_DOS_VERSION	0x9c	/* data is word holding DOS version under which
-				 * object file was created. */
-#define CC_MODEL    	0x9d	/* data is memory model of module: s, c, m, l,
-				 * or h */
-#define CC_DOSSEG   	0x9e	/* enable DOS segment ordering */
-#define CC_LIBRARY  	0x9f	/* data is name of library to be searched
-				 * to resolve external references. */
-#define CC_MSOFT_EXT  	0xa1	/* indicates that Microsoft extensions to
-				 * the Intel object spec are used. */
-
+#define CC_TRANSLATOR                                                 \
+    0x00                  /* data is name of translator that produced \
+                           * the object module */
+#define CC_COPYRIGHT 0x01 /* data is copyright notice */
+#define CC_DOS_VERSION                                   \
+    0x9c /* data is word holding DOS version under which \
+          * object file was created. */
+#define CC_MODEL                                                      \
+    0x9d               /* data is memory model of module: s, c, m, l, \
+                        * or h */
+#define CC_DOSSEG 0x9e /* enable DOS segment ordering */
+#define CC_LIBRARY                                 \
+    0x9f /* data is name of library to be searched \
+          * to resolve external references. */
+#define CC_MSOFT_EXT                               \
+    0xa1 /* indicates that Microsoft extensions to \
+          * the Intel object spec are used. */
 
 /*
  * End of module. Followed by:
@@ -82,13 +86,15 @@
  *	- entry point fixup, if module contains the entry.
  *	- checksum (byte)
  */
-#define MO_MODEND   0x8a
+#define MO_MODEND 0x8a
 
 /* Module types */
-#define MT_IS_MAIN 	0x80	/* Set in modtype if it's a main program module,
-				 * whatever that means. */
-#define MT_HAS_START	0x40	/* Set in modtype if the module holds the
-				 * entry point for the program */
+#define MT_IS_MAIN                                        \
+    0x80 /* Set in modtype if it's a main program module, \
+          * whatever that means. */
+#define MT_HAS_START                               \
+    0x40 /* Set in modtype if the module holds the \
+          * entry point for the program */
 
 /*
  * Definition of external undefined symbols. Followed by:
@@ -100,7 +106,7 @@
  *	      records. If 0, then no type defined for the beast.
  *	- checksum (byte)
  */
-#define MO_EXTDEF   0x8c
+#define MO_EXTDEF 0x8c
 
 /*
  * Definition of simple types in a not-so-simple manner. Followed by:
@@ -122,21 +128,21 @@
  *		  the length-in-bits field for a "near" type.
  *	    	- a type index for the element type.
  */
-#define MO_TYPDEF   0x8e
+#define MO_TYPDEF 0x8e
 
 /* type classes */
-#define TC_NEAR	    	0x62
-#define TC_FAR	    	0x61
+#define TC_NEAR 0x62
+#define TC_FAR 0x61
 
 /* type types */
-#define TT_ARRAY    	0x77
-#define TT_STRUCT   	0x79
-#define TT_SCALAR   	0x7b
+#define TT_ARRAY 0x77
+#define TT_STRUCT 0x79
+#define TT_SCALAR 0x7b
 
 /* type sizes */
-#define TS_TWO_BYTE    	0x81
-#define TS_THREE_BYTE	0x84
-#define TS_FOUR_BYTE	0x88
+#define TS_TWO_BYTE 0x81
+#define TS_THREE_BYTE 0x84
+#define TS_FOUR_BYTE 0x88
 
 /*
  * Definition of symbols exported from this module. Followed by:
@@ -166,7 +172,7 @@
 
 #define MO_LPUBDEF1 0xb6
 #define MO_LPUBDEF2 0xb7
-#define MO_PUBDEF   0x90
+#define MO_PUBDEF 0x90
 
 /*
  * Line number mapping. Followed by:
@@ -180,7 +186,7 @@
  *	    - starting offset (word)
  *	- checksum (byte)
  */
-#define MO_LINNUM   0x94
+#define MO_LINNUM 0x94
 
 /*
  * List of names to be referenced by later records. Followed by:
@@ -188,7 +194,7 @@
  *	- one or more names (counted ascii)
  *	- checksum (byte)
  */
-#define MO_LNAMES   0x96
+#define MO_LNAMES 0x96
 
 /*
  * Segment definition. Followed by:
@@ -220,15 +226,15 @@
  *	- overlay name index (index)
  *	- checksum (byte)
  */
-#define MO_SEGDEF   0x98
+#define MO_SEGDEF 0x98
 
-#define SA_PAGE_RESIDENT    0x01
-#define SA_BIG	    	    0x02
-#define SA_COMBINE  	    0x1c
-#define SA_ALIGN    	    0xe0
+#define SA_PAGE_RESIDENT 0x01
+#define SA_BIG 0x02
+#define SA_COMBINE 0x1c
+#define SA_ALIGN 0xe0
 
-#define SA_COMBINE_SHIFT    2
-#define SA_ALIGN_SHIFT	    5
+#define SA_COMBINE_SHIFT 2
+#define SA_ALIGN_SHIFT 5
 
 /*
  * 32-bit Segment definition. Followed by:
@@ -263,7 +269,7 @@
  */
 #define MO_SEGDEF32 0x99
 
-#define SA_USE32    0x01
+#define SA_USE32 0x01
 /* Other SA_ constants apply here, too */
 
 /*
@@ -275,7 +281,7 @@
  *	    - segment (index)
  *	- checksum (byte)
  */
-#define MO_GRPDEF   0x9a
+#define MO_GRPDEF 0x9a
 
 /*
  * Fixup list. Applies to the immediately-preceding LEDATA or LIDATA record.
@@ -304,41 +310,45 @@
  * fixup data byte, rather than requiring an extra byte or two for the
  * index.
  */
-#define MO_FIXUPP   0x9c
+#define MO_FIXUPP 0x9c
 
 /* Fields of thread data */
-#define TD_IS_FRAME 	0x40	/* Set if thread is for a frame. Clear if
-				 * thread is for a target */
-#define TD_METHOD   	0x1c	/* Fixup method */
-#define TD_METHOD_SHIFT	2
-#define TD_THREAD_NUM	0x03	/* Thread number */
+#define TD_IS_FRAME                                              \
+    0x40               /* Set if thread is for a frame. Clear if \
+                        * thread is for a target */
+#define TD_METHOD 0x1c /* Fixup method */
+#define TD_METHOD_SHIFT 2
+#define TD_THREAD_NUM 0x03 /* Thread number */
 
-#define TD_METHOD_SHIFT	2
+#define TD_METHOD_SHIFT 2
 
 /* Frame fixup methods */
-#define FFM_SEGMENT 	0x00	/* Frame is a segment index */
-#define FFM_GROUP   	0x01	/* Frame is a group index */
-#define FFM_EXTERNAL	0x02	/* Frame is the segment/group of an external
-				 * symbol whose index is given */
-#define FFM_ABSOLUTE	0x03	/* Frame is an absolute segment */
-#define FFM_SELF    	0x04	/* Frame is the LOCATION's own segment */
-#define FFM_TARGET  	0x05	/* Frame is the same as the target */
+#define FFM_SEGMENT 0x00 /* Frame is a segment index */
+#define FFM_GROUP 0x01   /* Frame is a group index */
+#define FFM_EXTERNAL                                                   \
+    0x02                  /* Frame is the segment/group of an external \
+                           * symbol whose index is given */
+#define FFM_ABSOLUTE 0x03 /* Frame is an absolute segment */
+#define FFM_SELF 0x04     /* Frame is the LOCATION's own segment */
+#define FFM_TARGET 0x05   /* Frame is the same as the target */
 
 /* Target Fixup Methods */
-#define TFM_SEGMENT 	0x00	/* Target is a segment index */
-#define TFM_GROUP   	0x01	/* Target is a group index */
-#define TFM_EXTERNAL	0x02	/* Target is an external symbol index */
-#define TFM_ABSOLUTE	0x03	/* Target is an absolute segment */
-#define TFM_SELF    	0x04	/* Target is the LOCATION's own segment (MSC7
-				 * EXTENSION) */
+#define TFM_SEGMENT 0x00  /* Target is a segment index */
+#define TFM_GROUP 0x01    /* Target is a group index */
+#define TFM_EXTERNAL 0x02 /* Target is an external symbol index */
+#define TFM_ABSOLUTE 0x03 /* Target is an absolute segment */
+#define TFM_SELF                                       \
+    0x04 /* Target is the LOCATION's own segment (MSC7 \
+          * EXTENSION) */
 
 /* Fixup Location High-byte */
-#define FLH_IS_FIXUP 	0x80	/* Set to indicate fixup, not thread */
-#define FLH_SEG_REL  	0x40	/* Clear if fixup is pc-relative */
-#define FLH_LOC_TYPE	0x1c	/* Location type */
+#define FLH_IS_FIXUP 0x80 /* Set to indicate fixup, not thread */
+#define FLH_SEG_REL 0x40  /* Clear if fixup is pc-relative */
+#define FLH_LOC_TYPE 0x1c /* Location type */
 #define FLH_LOC_TYPE_SHIFT 2
-#define FLH_OFFSET_HIGH	0x03	/* High two bits of fixup location offset.
-				 * Low 8 bits are in following byte */
+#define FLH_OFFSET_HIGH                             \
+    0x03 /* High two bits of fixup location offset. \
+          * Low 8 bits are in following byte */
 
 #define FL_OFFSET ((FLH_OFFSET_HIGH << 8) | 0xff)
 #define FL_LOC_TYPE (FLH_LOC_TYPE << 8)
@@ -346,23 +356,22 @@
 #define FL_IS_FIXUP (FLH_IS_FIXUP << 8)
 
 /* Fixup Location Types */
-#define FLT_LOW_BYTE	0x00	/* Location is low-order byte */
-#define FLT_OFFSET  	0x01	/* Location is word-sized offset */
-#define FLT_SEGMENT 	0x02	/* Location is word-sized segment */
-#define FLT_FAR_PTR 	0x03	/* Location is far pointer */
-#define FLT_HIGH_BYTE	0x04	/* Location is high-order byte */
-#define FLT_LDRRES_OFF	0x05	/* Location is offset to be resolved by the
-				 * run-time loader (same as FLT_OFFSET) */
-
+#define FLT_LOW_BYTE 0x00  /* Location is low-order byte */
+#define FLT_OFFSET 0x01    /* Location is word-sized offset */
+#define FLT_SEGMENT 0x02   /* Location is word-sized segment */
+#define FLT_FAR_PTR 0x03   /* Location is far pointer */
+#define FLT_HIGH_BYTE 0x04 /* Location is high-order byte */
+#define FLT_LDRRES_OFF                               \
+    0x05 /* Location is offset to be resolved by the \
+          * run-time loader (same as FLT_OFFSET) */
 
 /* Fixup Data byte */
-#define FD_FRAME_IS_THREAD  0x80    /* Set => FD_FRAME is thread # */
-#define FD_FRAME    	    0x70    /* Frame Fixup Method, or thread # */
-#define FD_FRAME_SHIFT	    4
-#define FD_TARG_IS_THREAD   0x08    /* Set => FD_TARGET is thread # */
-#define FD_NO_TARG_DISP     0x04    /* Set if target displacement is 0 */
-#define FD_TARGET   	    0x03    /* Target Fixup Method, or thread # */
-
+#define FD_FRAME_IS_THREAD 0x80 /* Set => FD_FRAME is thread # */
+#define FD_FRAME 0x70           /* Frame Fixup Method, or thread # */
+#define FD_FRAME_SHIFT 4
+#define FD_TARG_IS_THREAD 0x08 /* Set => FD_TARGET is thread # */
+#define FD_NO_TARG_DISP 0x04   /* Set if target displacement is 0 */
+#define FD_TARGET 0x03         /* Target Fixup Method, or thread # */
 
 /*
  * Binary (enumerated) data. Followed by:
@@ -372,7 +381,7 @@
  *	- data (variable)
  *	- checksum (byte)
  */
-#define MO_LEDATA   0xa0
+#define MO_LEDATA 0xa0
 
 /*
  * Binary (enumerated) data in 32-bit segment. Followed by:
@@ -400,7 +409,7 @@
  *	    	- the data in the block (variable)
  *	- checksum (byte)
  */
-#define MO_LIDATA   0xa2
+#define MO_LIDATA 0xa2
 
 /*
  * Binary (iterated) data in 32-bit segment. Followed by:
@@ -439,7 +448,7 @@
  *
  * Sizes are same as in TYPDEF records (qv. TS_*)
  */
-#define MO_COMDEF   0xb0
+#define MO_COMDEF 0xb0
 
 /*
  * "Back patch" record to perform fixups that a fixup record apparently can't.
@@ -457,26 +466,26 @@
  *	    - value to add to location data (word, dword if MO_BACKPATCH32)
  *	- checksum
  */
-#define MO_BACKPATCH	0xb2
-#define MO_BACKPATCH32	0xb3
+#define MO_BACKPATCH 0xb2
+#define MO_BACKPATCH32 0xb3
 
-#define BPS_BYTE    0
-#define BPS_WORD    1
-#define BPS_DWORD   2
+#define BPS_BYTE 0
+#define BPS_WORD 1
+#define BPS_DWORD 2
 
 /*
  * Special EXTDEF record for use by fixups for CodeView symbols. Format is
  * same as for MO_EXTDEF with the symbols being stored in the "externals"
  * vector, but they are not actually external.
  */
-#define MO_LEXTDEF    0xb4
+#define MO_LEXTDEF 0xb4
 
 /*
  * Special PUBDEF record for use by fixups for CodeView symbols. Format is
  * same as for MO_PUBDEF, but the symbols are not actually global. This is
  * used to provide the segment in which a symbol is stored.
  */
-#define MO_CVPUB    0xb6
+#define MO_CVPUB 0xb6
 
 /*
  * Header for a library file. Followed by:
@@ -487,95 +496,100 @@
  *	- number of 512-byte blocks in the dictionary (word)
  *	- random stuff (length - 6 bytes) of no interest.
  */
-#define MO_LHEADR   0xf0
+#define MO_LHEADR 0xf0
 
 /******************************************************************************
  *
  *		      OTHER EXTERNAL DEFINITIONS
  *
  ******************************************************************************/
-extern Vector	segments,   /* SegDesc *'s for segment indices for this file */
-#define MS_MIN_SEGMENT	((SegDesc *)256)
-	    	groups,	    /* GroupDesc *'s for group indices for this file */
-	    	names,	    /* ID's for name indices for this file */
-	    	externals;  /* ObjSym vptr's for external symbols for file (pass
-			     * 2) unless symbol is undefined, in which case it
-			     * contains the ID with MO_EXT_UNDEFINED set.
-			     * Contains ID's during pass 1, with
-			     * MO_EXT_IN_LIB set if the external's from a
-			     * library. */
-extern Vector	segSizes;   /* Vector of long segment sizes, for pass 2 only */
-extern ID   	msobj_CurFileName;
-extern ID   	msobj_FirstFileName;
+extern Vector segments, /* SegDesc *'s for segment indices for this file */
+#define MS_MIN_SEGMENT ((SegDesc*)256)
+    groups,             /* GroupDesc *'s for group indices for this file */
+    names,              /* ID's for name indices for this file */
+    externals;          /* ObjSym vptr's for external symbols for file (pass
+                         * 2) unless symbol is undefined, in which case it
+                         * contains the ID with MO_EXT_UNDEFINED set.
+                         * Contains ID's during pass 1, with
+                         * MO_EXT_IN_LIB set if the external's from a
+                         * library. */
+extern Vector segSizes; /* Vector of long segment sizes, for pass 2 only */
+extern ID msobj_CurFileName;
+extern ID msobj_FirstFileName;
 
 /*
  * Fixup thread info.
  */
-typedef union {
-    GroupDesc   *group; 	/* Group descriptor, if FFM_GROUP */
-    SegDesc 	*segment;	/* Segment descriptor, if FFM_SEGMENT */
-    VMPtr	external;	/* ObjSym in "symbols", if FFM_EXTERNAL */
-    word	absolute;	/* Absolute segment, if FFM_ABSOLUTE */
+typedef union
+{
+    GroupDesc* group; /* Group descriptor, if FFM_GROUP */
+    SegDesc* segment; /* Segment descriptor, if FFM_SEGMENT */
+    VMPtr external;   /* ObjSym in "symbols", if FFM_EXTERNAL */
+    word absolute;    /* Absolute segment, if FFM_ABSOLUTE */
 } MSFixData;
 
 /**************************************************************
-  	these enums are used by the relocation module to
-	know when to take floating point code and turn it into
-	software interrupts
+        these enums are used by the relocation module to
+        know when to take floating point code and turn it into
+        software interrupts
 ***************************************************************/
-typedef enum	
+typedef enum
 {
-    	FPED_FALSE,
-	FPED_TRUE,
-	FPED_FIARQQ,
-	FPED_FISRQQ,
-	FPED_FICRQQ,
-	FPED_FIERQQ,
-	FPED_FIDRQQ,
-    	FPED_FJARQQ,
-	FPED_FJSRQQ,
-	FPED_FJCRQQ,
-	FPED_FJERQQ,
-	FPED_FIWRQQ
+    FPED_FALSE,
+    FPED_TRUE,
+    FPED_FIARQQ,
+    FPED_FISRQQ,
+    FPED_FICRQQ,
+    FPED_FIERQQ,
+    FPED_FIDRQQ,
+    FPED_FJARQQ,
+    FPED_FJSRQQ,
+    FPED_FJCRQQ,
+    FPED_FJERQQ,
+    FPED_FIWRQQ
 } FloatingPointExtDef;
 
-typedef	struct _MSThread {
-    byte    	fixup;	    /* Fixup data byte w/fields to merge into fixup
-			     * using the thread */
-    byte    	valid;      /* Bit MST_* non-zero if thread is valid for 
-			     * frame/target */
-    MSFixData	data[2];
+typedef struct _MSThread
+{
+    byte fixup; /* Fixup data byte w/fields to merge into fixup
+                 * using the thread */
+    byte valid; /* Bit MST_* non-zero if thread is valid for
+                 * frame/target */
+    MSFixData data[2];
 } MSThread;
 
-#define MS_MAX_THREADS	4   	/* Number of fixup "threads" allowed for in an
-				 * object file... */
+#define MS_MAX_THREADS                               \
+    4 /* Number of fixup "threads" allowed for in an \
+       * object file... */
 
-extern MSThread	    msThreads[MS_MAX_THREADS];
-#define MST_FRAME   0
-#define MST_TARGET  1
+extern MSThread msThreads[MS_MAX_THREADS];
+#define MST_FRAME 0
+#define MST_TARGET 1
 
-#define MO_EXT_IN_LIB	 0x00000001 /* Pass 1 -- externals entry is for a
-				     * symbol in a library. */
-#define MO_EXT_UNDEFINED 0x00000001 /* Pass 2 -- externals entry is ID of
-				     * undefined symbol */
+#define MO_EXT_IN_LIB                                \
+    0x00000001 /* Pass 1 -- externals entry is for a \
+                * symbol in a library. */
+#define MO_EXT_UNDEFINED                             \
+    0x00000001 /* Pass 2 -- externals entry is ID of \
+                * undefined symbol */
 
-extern byte 	*msobjBuf;
-extern unsigned	msobjBufSize;
+extern byte* msobjBuf;
+extern unsigned msobjBufSize;
 
-extern byte 	MSObj_ReadRecord(FILE *stream, word *datalenPtr, int *recNoPtr);
-extern void 	MSObj_Init(FILE *);
+extern byte MSObj_ReadRecord(FILE* stream, word* datalenPtr, int* recNoPtr);
+extern void MSObj_Init(FILE*);
 
 /*
  * Macros to extract words in Intel byte-order without running afoul of
  * compiler optimizers.
  */
-#define MSObj_GetWordImm(bp) \
-    ((bp) += 2, ((bp)[-2] | ((bp)[-1] << 8)))
+#define MSObj_GetWordImm(bp) ((bp) += 2, ((bp)[-2] | ((bp)[-1] << 8)))
 
 #define MSObj_GetWord(var, bp) \
-    (var) =  *(bp)++; (var) |= *(bp)++ << 8
+    (var) = *(bp)++;           \
+    (var) |= *(bp)++ << 8
 
-#define MSObj_GetDWord(var, bp) \
+#define MSObj_GetDWord(var, bp)                                           \
     (var) = (bp)[0] | ((bp)[1] << 8) | ((bp)[2] << 16) | ((bp)[3] << 24); \
     (bp) += 4
 
@@ -584,133 +598,119 @@ extern void 	MSObj_Init(FILE *);
  * of the index field. Evaluates to the index, with bp advanced beyond the
  * field.
  */
-#define MSObj_GetIndex(bp) \
-    (((*(bp))&0x80) ? ((bp) += 2, ((((bp)[-2]&0x7f)<<8) | (bp)[-1])) : *(bp)++)
+#define MSObj_GetIndex(bp)                                                 \
+    (((*(bp)) & 0x80) ? ((bp) += 2, ((((bp)[-2] & 0x7f) << 8) | (bp)[-1])) \
+                      : *(bp)++)
 
-extern SegDesc	    *MSObj_GetSegment(byte **bufPtr);
-extern GroupDesc    *MSObj_GetGroup(byte **bufPtr);
-extern ID   	    MSObj_GetName(byte **bufPtr);
-extern VMPtr	    MSObj_GetExternal(byte **bufPtr);
-extern int  	    MSObj_DecodeFixup(const char *file,
-				      SegDesc *sd,
-				      byte **bpPtr,
-				      word *fixLocPtr,
-				      byte *fixDataPtr,
-				      MSFixData *targetPtr,
-				      MSFixData *framePtr);
+extern SegDesc* MSObj_GetSegment(byte** bufPtr);
+extern GroupDesc* MSObj_GetGroup(byte** bufPtr);
+extern ID MSObj_GetName(byte** bufPtr);
+extern VMPtr MSObj_GetExternal(byte** bufPtr);
+extern int MSObj_DecodeFixup(const char* file,
+    SegDesc* sd,
+    byte** bpPtr,
+    word* fixLocPtr,
+    byte* fixDataPtr,
+    MSFixData* targetPtr,
+    MSFixData* framePtr);
 
-extern void 	    MSObj_DecodeFrameOrTarget(byte fixupMethod,
-					      byte **bpPtr,
-					      MSFixData *dataPtr);
-extern int 	    MSObj_DecodeSegDef(const char *file,
-				       byte rectype,
-				       byte *data,
-				       int *typePtr,
-				       int *alignPtr,
-				       ID *namePtr,
-				       ID *classPtr,
-				       word *framePtr,
-				       long *sizePtr);
+extern void MSObj_DecodeFrameOrTarget(
+    byte fixupMethod, byte** bpPtr, MSFixData* dataPtr);
+extern int MSObj_DecodeSegDef(const char* file,
+    byte rectype,
+    byte* data,
+    int* typePtr,
+    int* alignPtr,
+    ID* namePtr,
+    ID* classPtr,
+    word* framePtr,
+    long* sizePtr);
 
-extern ID   	    MSObj_MakeString(void);
+extern ID MSObj_MakeString(void);
 
-extern void 	    MSObj_AddAnonStruct(ObjSym *os,
-					VMBlockHandle typeBlock,
-					int size,
-					int nfields);
+extern void MSObj_AddAnonStruct(
+    ObjSym* os, VMBlockHandle typeBlock, int size, int nfields);
 
-extern ObjType	    *MSObj_AllocType(VMBlockHandle, word *);
-extern word 	    MSObj_CreateArrayType(VMBlockHandle typeBlock,
-					  word base,
-					  int alen);
-
+extern ObjType* MSObj_AllocType(VMBlockHandle, word*);
+extern word MSObj_CreateArrayType(VMBlockHandle typeBlock, word base, int alen);
 
 /*
  * Functions for saving object records around until the whole file has been
  * processed.
  */
-typedef struct _MSSaveRecLinks {
-    struct  _MSSaveRec	*next;
-    struct  _MSSaveRec 	*prev;
+typedef struct _MSSaveRecLinks
+{
+    struct _MSSaveRec* next;
+    struct _MSSaveRec* prev;
 } MSSaveRecLinks;
 
-
-typedef struct _MSSaveRec {
-    MSSaveRecLinks  links;
-    byte    	    type;   	/* Record type */
-    word    	    len;    	/* Record length (excluding checksum, which
-				 * isn't here anyway...) */
-    byte    	    *data;  	/* Data for record */
+typedef struct _MSSaveRec
+{
+    MSSaveRecLinks links;
+    byte type;  /* Record type */
+    word len;   /* Record length (excluding checksum, which
+                 * isn't here anyway...) */
+    byte* data; /* Data for record */
 } MSSaveRec;
 
-typedef struct _MSSaveFixupRec {
-    MSSaveRecLinks  links;
-    dword    	    startOff;
-    dword    	    endOff;
-    MSThread	    threads[MS_MAX_THREADS];
-    byte    	    data[LABEL_IN_STRUCT];
+typedef struct _MSSaveFixupRec
+{
+    MSSaveRecLinks links;
+    dword startOff;
+    dword endOff;
+    MSThread threads[MS_MAX_THREADS];
+    byte data[LABEL_IN_STRUCT];
 } MSSaveFixupRec;
 
-extern MSSaveRecLinks pubHead;	    /* predefined list for saving PUBDEF
-				     * records */
+extern MSSaveRecLinks pubHead; /* predefined list for saving PUBDEF
+                                * records */
 
-extern void 	    MSObj_SaveRecord(byte   rectype,
-				     word   reclen,
-				     MSSaveRecLinks *head);
+extern void MSObj_SaveRecord(byte rectype, word reclen, MSSaveRecLinks* head);
 
-extern void 	    MSObj_FreeSaved(MSSaveRecLinks *head);
+extern void MSObj_FreeSaved(MSSaveRecLinks* head);
 
-extern void 	    MSObj_SaveFixups(dword   startOff,
-				     word   reclen,
-				     word   datalen,
-				     MSSaveRecLinks *head);
+extern void MSObj_SaveFixups(
+    dword startOff, word reclen, word datalen, MSSaveRecLinks* head);
 
-extern void 	    MSObj_FreeFixups(MSSaveRecLinks *head);
+extern void MSObj_FreeFixups(MSSaveRecLinks* head);
 
 /*
  * Pre-processor function for object records. If returns TRUE, function
  * has completely handled the object record.
  */
-typedef int 	    MSObjCheck(const char *file, byte rectype, word reclen,
-			       byte *data, int pass);
-typedef void	    MSObjFinish(const char *file, int happy, int pass);
+typedef int MSObjCheck(
+    const char* file, byte rectype, word reclen, byte* data, int pass);
+typedef void MSObjFinish(const char* file, int happy, int pass);
 
-extern MSObjCheck   *msobjCheck;
-extern MSObjFinish  *msobjFinish;
+extern MSObjCheck* msobjCheck;
+extern MSObjFinish* msobjFinish;
 
-extern MSObjCheck   CV_Check,
-		    MSObj_DefCheck,
-		    Borland_Check;
+extern MSObjCheck CV_Check, MSObj_DefCheck, Borland_Check;
 
-extern MSObjFinish  CV_Finish,
-		    Pass1MS_Finish,
-		    Pass2MS_Finish,
-	    	    Borland_Finish;
+extern MSObjFinish CV_Finish, Pass1MS_Finish, Pass2MS_Finish, Borland_Finish;
 
-extern unsigned Pass1MS_CountRels(const char *file,
-				  byte	    rectype,
-				  SegDesc   *sd,
-				  word	    startOff,
-				  word	    reclen,
-				  byte	    *data);
+extern unsigned Pass1MS_CountRels(const char* file,
+    byte rectype,
+    SegDesc* sd,
+    word startOff,
+    word reclen,
+    byte* data);
 extern void Pass1MS_EnterExternal(ID name);
-extern void Pass1MS_ProcessObject(const char *file,
-				  FILE	    *f);
+extern void Pass1MS_ProcessObject(const char* file, FILE* f);
 
-extern void Pass2MS_ProcessObject(const char *file,
-				  FILE	    *f);
+extern void Pass2MS_ProcessObject(const char* file, FILE* f);
 
-#define DONT_RETURN_ORDER ((int *)NULL)
+#define DONT_RETURN_ORDER ((int*)NULL)
 
-extern char *MSObj_DecodeLMemName(char *segName, int *order);
+extern char* MSObj_DecodeLMemName(char* segName, int* order);
 
-extern int MSObj_GetLMemSegOrder(SegDesc *seg);
+extern int MSObj_GetLMemSegOrder(SegDesc* seg);
 
-#define LMEM_HEADER 	    0
-#define LMEM_HANDLES	    1
-#define LMEM_HEAP   	    2
+#define LMEM_HEADER 0
+#define LMEM_HANDLES 1
+#define LMEM_HEAP 2
 
-#include    "lmem.h"
+#include "lmem.h"
 
 /*
  * To properly determine the actual size of the heap portion of an lmem troika,
@@ -728,35 +728,37 @@ extern int MSObj_GetLMemSegOrder(SegDesc *seg);
  * The array of pointer to MSObjLMemData structures persists from pass1 to pass2
  * so we know what the handle table looked like before we re-laid out the heap.
  */
-typedef struct {
-    SegDesc 	    *handles;	    /* Segment w/handle table */
-    word    	    heapSize;	    /* Original heap size */
-    MSSaveRecLinks  fixups;	    /* Chain of fixup records, in address
-				     * order */
-    word    	    handleData[LABEL_IN_STRUCT];
-  				    /* Block holding the handle table, as
-				     * read in from the object file */
+typedef struct
+{
+    SegDesc* handles;      /* Segment w/handle table */
+    word heapSize;         /* Original heap size */
+    MSSaveRecLinks fixups; /* Chain of fixup records, in address
+                            * order */
+    word handleData[LABEL_IN_STRUCT];
+    /* Block holding the handle table, as
+     * read in from the object file */
 } MSObjLMemData;
 
-#define LMEM_SIZE_SIZE    2	    /* Size of the size word. This is applied
-				     * to all relocations within the handles
-				     * segment of an lmem troika */
+#define LMEM_SIZE_SIZE                          \
+    2 /* Size of the size word. This is applied \
+       * to all relocations within the handles  \
+       * segment of an lmem troika */
 
-extern Vector	lmemSegs;
+extern Vector lmemSegs;
 
-extern Boolean MSObj_PerformRelocations(const char *file,
-					byte *data,
-					byte *bp,
-					byte *endRecord,
-					SegDesc *sd,
-					word baseOff,
-					int pass,
-					byte **nextRelPtr);
+extern Boolean MSObj_PerformRelocations(const char* file,
+    byte* data,
+    byte* bp,
+    byte* endRecord,
+    SegDesc* sd,
+    word baseOff,
+    int pass,
+    byte** nextRelPtr);
 
-extern word MSObj_CalcIDataSize(byte   **bufPtr);
+extern word MSObj_CalcIDataSize(byte** bufPtr);
 
-extern void MSObj_ExpandIData(byte **dataPtr,	    /* Iterated data block */
-			      byte **bufPtr);	    /* Destination buffer */
+extern void MSObj_ExpandIData(byte** dataPtr, /* Iterated data block */
+    byte** bufPtr);                           /* Destination buffer */
 
 extern FloatingPointExtDef MSObj_IsFloatingPointExtDef(ID name);
 #endif /* _MSOBJ_H_ */

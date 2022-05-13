@@ -23,13 +23,13 @@
 #ifndef _CV_H_
 #define _CV_H_
 
-extern void CV_Init   (const char *file, FILE *f);
-extern void CV_Finish (const char *file, Boolean happy, int pass);
-extern int  CV_Check  (const char *file, byte rectype, word reclen, byte *bp,
-                       int pass);
-extern void CV32_Init   (const char *file, FILE *f);
-extern void CV32_Finish (const char *file, Boolean happy, int pass);
-extern int  CV32_Check  (const char *file, byte rectype, word reclen, byte *bp,
-                      int pass);
+extern void CV_Init(const char* file, FILE* f);
+extern void CV_Finish(const char* file, Boolean happy, int pass);
+extern int CV_Check(
+    const char* file, byte rectype, word reclen, byte* bp, int pass);
+extern void CV32_Init(const char* file, FILE* f);
+extern void CV32_Finish(const char* file, Boolean happy, int pass);
+extern int CV32_Check(
+    const char* file, byte rectype, word reclen, byte* bp, int pass);
 
 #endif /* _CV_H_ */

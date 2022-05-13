@@ -23,9 +23,8 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 
-extern int  Parse_GeodeParams (char *file, char *deflongname, int libsOnly);
-extern void Parse_FindSym     (char *name, int type, char *typeName,
-                               word *resid, word *offset);
-extern void yyerror           (char *s);
+extern int Parse_GeodeParams(char* file, char* deflongname, int libsOnly);
+extern void Parse_FindSym(
+    char* name, int type, char* typeName, word* resid, word* offset);
+extern void yyerror(char* s);
 #endif /* _PARSE_H_ */
-
