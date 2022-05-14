@@ -17,11 +17,8 @@
  *	Mark a block as dirty
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmDirty.c,v 1.7 91/04/26 11:51:58 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 
 /***********************************************************************

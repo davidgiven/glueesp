@@ -21,16 +21,12 @@
  *	Open a VM file
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmOpen.c,v 1.32 96/05/20 18:58:32 dbaumann Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 
-#include <os90File.h>
-#include <compat/file.h>
-#include <compat/string.h>
+#include "os90File.h"
+#include <string.h>
 #include <stdio.h>
 #include "malloc.h"
 
@@ -69,7 +65,7 @@ static int VMInitFile(VMFilePtr file)
     VMHeader* hdr;       /* Allocated header to be filled-in */
     VMBlock* block;      /* General block pointer */
     MemHandle hdrHandle; /* Memory handle of header block */
-    char *cp, *cp2;
+    char* cp;
     int returnCode;
     long bytesWritten = 0;
 
@@ -264,10 +260,10 @@ VMHandle VMOpen(short flags, /* Flags for open */
                               * directory in which to create temp file*/
     short* status)           /* RETURN: status */
 {
-    VMFilePtr file;        /* New structure to return */
-    int oflags = O_BINARY; /* Flags for (non-temp) open */
-    MemHandle memHandle;   /* Memory handle for header block */
-    int sflags = 0;        /* Flags for sharing mode */
+    VMFilePtr file;      /* New structure to return */
+    int oflags = 0;      /* Flags for (non-temp) open */
+    MemHandle memHandle; /* Memory handle for header block */
+    int sflags = 0;      /* Flags for sharing mode */
     int returnCode;
     long bytesRead = 0;
 
@@ -412,7 +408,7 @@ VMHandle VMOpen(short flags, /* Flags for open */
     FileUtil_Seek(file->fd, 0L, SEEK_SET);
 
     errno = 0; /* In case file smaller than file header */
-    FileUtil_Read(file->fd, (char*)&file->fileHdr, HEADER_SIZE, &bytesRead);
+    FileUtil_Read(file->fd, (genptr)&file->fileHdr, HEADER_SIZE, &bytesRead);
     switch (bytesRead)
     {
         case 0:

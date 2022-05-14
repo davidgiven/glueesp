@@ -21,9 +21,6 @@
  *	Functions for manipulating a kernel executable file as our output.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: kernel.c,v 3.5 92/03/25 19:33:53 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "output.h"
@@ -561,7 +558,7 @@ static void KernelWrite(void* base, /* Base of file buffer */
 
             if (!block &&
                 !Sym_Find(symbols,
-                    NULL,
+                    0,
                     ST_EnterNoLen(symbols, strings, "SysEmptyRoutine"),
                     &block,
                     &offset,

@@ -27,18 +27,14 @@
  *	phrase often used when talking about relocations.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: pass2vm.c,v 3.25 96/07/08 17:30:23 tbradley Exp $";
-#endif lint
 
+#include "config.h"
 #include "glue.h"
 #include "obj.h"
 #include "output.h"
 #include "sym.h"
 #include "geode.h"
 #include "library.h"
-#include <config.h>
-#include <compat/stdlib.h>
 
 /***********************************************************************
  *				Pass2VMCheckFixed
@@ -864,7 +860,7 @@ static int Pass2VMHandleMethCall(SegDesc* sd, /* Segment being operated on */
      * should just use the kernel routine because the method may not be
      * called staticly.
      */
-    psymBlock = (VMBlockHandle)NULL;
+    psymBlock = (VMBlockHandle)0;
     if ((bsym != NULL) && (bsym->u.binding.callType >= OSYM_STATIC))
     {
         proc = OBJ_FETCH_SID(bsym->u.binding.proc);

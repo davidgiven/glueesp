@@ -74,7 +74,7 @@
 #ifndef _VMINT_H_
 #define _VMINT_H_
 
-#include <vm.h>
+#include "vm.h"
 
 #include "fileUtil.h"
 #include <assert.h>
@@ -236,7 +236,7 @@ typedef struct
     byte VMH_noCompress;        /* True if compression is disabled */
     word VMH_dbMapBlock;        /* Map block if file contains DB
                                  * stuff */
-    VMBlock VMH_blockTable[LABEL_IN_STRUCT]; /* Block table itself */
+    VMBlock VMH_blockTable[];   /* Block table itself */
 } VMHeader;
 
 #define VMH_BT_OFF offsetof(VMHeader, VMH_blockTable)

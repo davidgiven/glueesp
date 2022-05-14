@@ -21,14 +21,10 @@
  *	Functions for producing PC/GEOS font files.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: font.c,v 1.4 91/04/26 12:38:13 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "output.h"
-#include <compat/file.h>
 
 /* Goddamn HighC won't let me use my nice typedefs... */
 static int FontPrepare(char*, char*, char*);
@@ -121,7 +117,7 @@ static int FontPrepare(char* outfile, char* paramfile, char* mapfile)
         /*
          * We always print the map to stdout...
          */
-        printf("%d bytes in font file %s\n", cbase, outfile);
+        gprintf("%d bytes in font file %s\n", cbase, outfile);
 
         fflush(stdout);
     }

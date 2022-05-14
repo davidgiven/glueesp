@@ -17,11 +17,8 @@
  *	Close down a VM file
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmClose.c,v 1.7 92/09/02 19:33:53 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 #include "malloc.h"
 

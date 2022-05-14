@@ -50,20 +50,11 @@
  *	-M <name> flag.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vm.c,v 2.18 96/07/08 17:31:14 tbradley Exp $";
-#endif lint
 
 #include "glue.h"
 #include "output.h"
 #include "geo.h"
-
-#include <config.h>
-#include <compat/file.h>
-
-#include <stddef.h>
-
-#include <vm.h>
+#include "vm.h"
 
 #ifdef sparc
 #include <alloca.h>
@@ -580,7 +571,7 @@ static int VmPrepare(char* outfile, char* paramfile, char* mapfile)
 
             if (sd->combine != SEG_LIBRARY)
             {
-                printf("%-30.30i  %04xh  %5d\n",
+                gprintf("%-30.30i  %04xh  %5d\n",
                     sd->name,
                     sd->pdata.block,
                     sd->size);

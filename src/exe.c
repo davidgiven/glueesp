@@ -22,14 +22,10 @@
  *	Functions for manipulating a .exe file as our output.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: exe.c,v 2.6 91/04/26 12:38:03 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "output.h"
-#include <compat/file.h>
 
 /* Goddamn HighC won't let me use my nice typedefs... */
 static int ExePrepare(char*, char*, char*);

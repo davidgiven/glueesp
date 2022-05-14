@@ -22,18 +22,11 @@
  *	split across the files geo.c, parse.y and library.c
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: geo.c,v 3.60 96/07/08 17:27:25 tbradley Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "output.h"
 #include "geo.h"
-#include <compat/file.h>
-#include <compat/string.h>
-
-#include <stddef.h>
 #include <ctype.h>
 #include <time.h>
 
@@ -491,11 +484,11 @@ static int GeoPrepare(char* outfile, char* paramfile, char* mapfile)
                 if (sd->name)
                 {
                     segName = ST_Lock(symbols, sd->name);
-                    printf("*** Empty segment: %s\n", segName);
+                    gprintf("*** Empty segment: %s\n", segName);
                     ST_Unlock(symbols, sd->name);
                 }
                 else
-                    printf("*** Empty segment: (unnamed)\n");
+                    gprintf("*** Empty segment: (unnamed)\n");
 
                 Seg_EnterGroupMember(outfile, gd, sd);
             }
@@ -1175,8 +1168,8 @@ static int GeoPrepare(char* outfile, char* paramfile, char* mapfile)
 		   (numImport*sizeof(ImportedLibraryEntry)) +
 		   (geoHeader.resCount * 10));
 #endif
-        printf("Resource                          Size   # Relocs\n");
-        printf("-------------------------------------------------\n");
+        gprintf("Resource                          Size   # Relocs\n");
+        gprintf("-------------------------------------------------\n");
         totalSize = 0;
 
         if (localizationWanted)
@@ -1215,7 +1208,7 @@ static int GeoPrepare(char* outfile, char* paramfile, char* mapfile)
 
             if (sd->name == NullID)
             {
-                printf("CoreBlock                            0        0\n");
+                gprintf("CoreBlock                            0        0\n");
             }
             else if ((sd->combine != SEG_ABSOLUTE) &&
                      (sd->combine != SEG_LIBRARY))
@@ -1224,15 +1217,15 @@ static int GeoPrepare(char* outfile, char* paramfile, char* mapfile)
                 {
                     fixedSize += sd->size;
                 }
-                printf("%-33.32li%5d    %5d\n", sd->name, sd->size, sd->nrel);
+                gprintf("%-33.32li%5d    %5d\n", sd->name, sd->size, sd->nrel);
                 if (sd->size > 10000)
                 {
-                    printf("Warning: %i is very large, that is a BAD thing.\n",
+                    gprintf("Warning: %i is very large, that is a BAD thing.\n",
                         sd->name);
                 }
                 if (localizationFile)
                 {
-                    fprintf(localizationFile,
+                    fgprintf(localizationFile,
                         "resource %i %d\n",
                         sd->name,
                         sd->pdata.resid);
@@ -1244,48 +1237,48 @@ static int GeoPrepare(char* outfile, char* paramfile, char* mapfile)
         {
             if (dbcsRelease)
             {
-                fprintf(localizationFile, "GeodeLongName \"");
+                fgprintf(localizationFile, "GeodeLongName \"");
                 for (i = 0; i < GFH_LONGNAME_SIZE; i += 2)
                 {
                     char c;
                     c = geoHeader.v2x.execHeader.geosFileHeader.longName[i];
                     if (c)
                     {
-                        fprintf(localizationFile, "%c", c);
+                        fgprintf(localizationFile, "%c", c);
                     }
                     else
                     {
                         break;
                     }
                 }
-                fprintf(localizationFile, "\"\n");
+                fgprintf(localizationFile, "\"\n");
             }
             else
             {
-                fprintf(localizationFile,
+                fgprintf(localizationFile,
                     "GeodeLongName \"%s\"\n",
                     geoHeader.v2x.execHeader.geosFileHeader.longName);
             }
-            fprintf(localizationFile,
+            fgprintf(localizationFile,
                 "Protocol %d %d\n",
                 geoHeader.v2x.execHeader.geosFileHeader.protocol.major,
                 geoHeader.v2x.execHeader.geosFileHeader.protocol.minor);
             fclose(localizationFile);
         }
 
-        printf("\n");
-        printf("Total size: %d byte%s	    Fixed size: %d byte%s\n",
+        gprintf("\n");
+        gprintf("Total size: %d byte%s	    Fixed size: %d byte%s\n",
             totalSize,
             (totalSize == 1 ? "" : "s"),
             fixedSize,
             (fixedSize == 1 ? "" : "s"));
         if (fixedSize > 1024)
         {
-            printf(
+            gprintf(
                 "Warning: Fixed size should be reduced by moving things into "
                 "movable resources\n");
         }
-        printf("Uninitialized data/stack: %d byte%s\n\n",
+        gprintf("Uninitialized data/stack: %d byte%s\n\n",
             GH(execHeader.udataSize),
             GH(execHeader.udataSize) == 1 ? "" : "s");
 
@@ -1556,7 +1549,7 @@ static int GeoReloc(int type, /* Relocation type (from obj file) */
                      * Reduce expected # of relocations for this segment by 1,
                      * since we now know we don't need it.
                      */
-                    printf("%i, %i\n", targ->name, frame->name);
+                    gprintf("%i, %i\n", targ->name, frame->name);
                     if (targ->type == S_SUBSEGMENT)
                     {
                         Seg_FindPromotedGroup(targ)->nrel--;
@@ -1593,7 +1586,7 @@ static int GeoReloc(int type, /* Relocation type (from obj file) */
                      * Reduce expected # of relocations for this segment by 1,
                      * since we now know we don't need it.
                      */
-                    printf("%i, %i\n", targ->name, frame->name);
+                    gprintf("%i, %i\n", targ->name, frame->name);
                     if (targ->type == S_SUBSEGMENT)
                     {
                         Seg_FindPromotedGroup(targ)->nrel--;
@@ -1700,7 +1693,7 @@ static int GeoReloc(int type, /* Relocation type (from obj file) */
                  * Reduce expected # of relocations for this segment by 1,
                  * since we now know we don't need it.
                  */
-                printf("%i, %i\n", targ->name, frame->name);
+                gprintf("%i, %i\n", targ->name, frame->name);
                 if (targ->type == S_SUBSEGMENT)
                 {
                     Seg_FindPromotedGroup(targ)->nrel--;
@@ -2183,28 +2176,28 @@ static void GeoWrite(void* base, /* Base of file buffer */
 
     if (numLibs)
     {
-        printf("Import    Number   Type      Protocol\n");
-        printf("-------------------------------------\n");
+        gprintf("Import    Number   Type      Protocol\n");
+        gprintf("-------------------------------------\n");
         for (i = 0; i < numLibs; i++)
         {
-            printf("%-10.*s", GEODE_NAME_SIZE, libs[i].entry.name);
+            gprintf("%-10.*s", GEODE_NAME_SIZE, libs[i].entry.name);
             if (libs[i].lnum == IS_KERNEL)
             {
-                printf("KERNEL");
+                gprintf("KERNEL");
             }
             else if (libs[i].lnum == NO_LOAD)
             {
-                printf("NOLOAD");
+                gprintf("NOLOAD");
             }
             else if (libs[i].lnum == NO_LOAD_FIXED)
             {
-                printf("FIXED ");
+                gprintf("FIXED ");
             }
             else
             {
-                printf("%3d   ", libs[i].lnum);
+                gprintf("%3d   ", libs[i].lnum);
             }
-            printf("   %-10s %3d.%03d\n",
+            gprintf("   %-10s %3d.%03d\n",
                 (swaps(libs[i].entry.geodeAttrs) & GA_LIBRARY ? "library"
                                                               : "driver"),
                 libs[i].entry.protocol.major,

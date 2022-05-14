@@ -17,13 +17,8 @@
  *	Allocate an unassigned handle to someone
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmAlUnas.c,v 1.5 96/05/20 18:58:12 dbaumann Exp $";
-#endif lint
 
-#include <config.h>
-#include <compat/string.h>
-#include <stdio.h>
+#include "config.h"
 #include "vmInt.h"
 
 /***********************************************************************

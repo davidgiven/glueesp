@@ -21,24 +21,20 @@
  *	Utilities for mucking with Microsoft-format object files.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: msobj.c,v 1.28 95/11/08 17:23:59 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "borland.h"
 #include "msobj.h"
 #include "obj.h"
-#include "objformat.h"
+#include "objfmt.h"
 #include "output.h"
 #include "sym.h"
 #include "geo.h" /* For object relocations */
 #include "library.h"
-#include <objfmt.h>
-#include <compat/stdlib.h>
-#include <compat/string.h>
+#include "objfmt.h"
 #include "cv.h"
+#include <search.h>
 
 ID msobj_CurFileName = NullID;
 ID msobj_FirstFileName = NullID;
@@ -1956,7 +1952,8 @@ static void MSObjLocateSymbol(SegDesc* sd,
                  */
                 if (s == (ObjSym*)NULL)
                 {
-                    VMUnlock(patient->symFile, oame->block);
+                    // dtrg: no such symbol 'patient'?
+                    // VMUnlock(patient->symFile, oame->block);
                 }
                 break;
             }
@@ -1968,14 +1965,14 @@ static void MSObjLocateSymbol(SegDesc* sd,
                  * the one we seek, so unlock this one and proceed to search
                  * that block.
                  */
-                VMUnlock(patient->symFile, oame->block);
+                VMUnlock(symbols, oame->block);
                 oame--, i++;
             }
         }
         /*
          * Unlock the address map before returning...
          */
-        VMUnlock(patient->symFile, s->addrMap);
+        VMUnlock(symbols, sd->addrMap);
     }
 }
 

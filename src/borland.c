@@ -184,16 +184,13 @@
  *
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: borland.c,v 1.33 95/11/08 17:22:49 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "borland.h"
 #include "msobj.h"
 #include "obj.h"
 #include "sym.h"
-#include <objfmt.h>
+#include "objfmt.h"
 
 #define BORLAND_INIT_SYMS                        \
     256 /* Initial number of symbols to allocate \
@@ -928,7 +925,7 @@ static void BorlandProcessPublic(
     const char* file, byte rectype, word reclen, byte* bp)
 {
     SegDesc* sd;
-    GroupDesc* gd;
+    // GroupDesc* gd;
     byte* tbp;
     byte* endRecord;
     int segIndex;
@@ -942,7 +939,7 @@ static void BorlandProcessPublic(
     /*
      * Fetch out the group and segment definitions.
      */
-    gd = MSObj_GetGroup(&bp);
+    // gd = MSObj_GetGroup(&bp);
     tbp = bp;
     sd = MSObj_GetSegment(&bp);
     segIndex = MSObj_GetIndex(tbp);
@@ -1785,7 +1782,7 @@ static void BorlandFinishSEU(byte* tname, /* Name for the type (counted
             }
             namelen = strlen(prefix) + *tname;
             name = (char*)malloc(namelen + 1);
-            sprintf(name, "%s%.*s", prefix, *tname, (char*)tname + 1);
+            sgprintf(name, "%s%.*s", prefix, *tname, (char*)tname + 1);
 
             typeName = ST_Enter(symbols, strings, name, namelen);
             flags = 0; /* Not nameless */
@@ -2679,7 +2676,7 @@ static void BorlandProcessBeginScope(const char* file,
         {
             char name[16];
 
-            sprintf(name, "block%d", ++scopeNum);
+            sgprintf(name, "block%d", ++scopeNum);
 
             sym =
                 BorlandEnterAddressSymbol(ST_EnterNoLen(symbols, strings, name),
@@ -3907,13 +3904,13 @@ static word BorlandCopyTypeDesc(int index, /* Index of type to copy */
 static ObjSym* BorlandDefineFunction(
     ObjSym* os, ObjSymHeader** oshPtr, BorlandType* btp)
 {
-    word returnType;
+    // word returnType;
     byte* bp;
 
     os->type = OSYM_PROC;
 
     bp = &btp->desc[1]; /* skip BTID_FUNCTION, of course */
-    returnType = MSObj_GetIndex(bp);
+    // returnType = MSObj_GetIndex(bp);
     switch (*bp)
     {
         case 2: /* near fastcall */
@@ -4677,7 +4674,7 @@ static void BorlandNukeTypes(void)
  *
  ***********************************************************************/
 void Borland_Finish(const char* file, /* Object file just read */
-    int happy,                        /* Non-zero if no errors, so all
+    Boolean happy,                    /* Non-zero if no errors, so all
                                        * symbolic information should be
                                        * copacetic */
     int pass)                         /* 1 or 2 */

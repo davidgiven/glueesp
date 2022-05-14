@@ -23,15 +23,10 @@
  *	Synchronize a VM file with its in-core image
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmUpdate.c,v 1.14 96/05/01 20:07:54 adam Exp $";
-#endif lint
 
-#include <config.h>
-#include <compat/queue.h>
+#include "config.h"
 #include "vmInt.h"
-#include "malloc.h"
-#include <compat/file.h>
+#include <search.h>
 
 #if !defined(_WIN32)
 #define size_t other_size_t
@@ -122,13 +117,11 @@ static void VMFlushWrites(VMFilePtr file)
 {
     genptr buf;
     int inbuf;
-    struct stat stb;
     VMQueue *q, *nq;
     int offset;
     int blksize = 2048; /* assume 2048, unless we can
                          * find out more in a particular
                          * OS */
-    int fstatResult;
     long bytesWritten = 0;
 
 #if 0
@@ -367,7 +360,6 @@ int VMWriteBlock(VMFilePtr file, /* File to which block belongs */
 
     VMBlockHandle blockH;
     int doSwap = 0;
-    int bytesWritten = 0;
 
     hdr = file->blkHdr;
 
@@ -518,6 +510,8 @@ int VMWriteBlock(VMFilePtr file, /* File to which block belongs */
     else
     {
 #ifdef SWAP
+        int bytesWritten = 0;
+
         /*
          * Seek to allocated position
          */
@@ -765,7 +759,7 @@ int VMUpdate(VMHandle vmHandle)
             file->fileHdr.v2.VMFH_headerSize = swapword(block->VMB_size);
             file->fileHdr.v2.VMFH_signature = swapword(VMFH_SIG);
             FileUtil_Write(file->fd,
-                (char*)&file->fileHdr.v2,
+                (genptr)&file->fileHdr.v2,
                 sizeof(file->fileHdr.v2),
                 &bytesWritten);
             if (bytesWritten != sizeof(file->fileHdr.v2))
@@ -779,7 +773,7 @@ int VMUpdate(VMHandle vmHandle)
             file->fileHdr.v1.VMFH_headerSize = swapword(block->VMB_size);
             file->fileHdr.v1.VMFH_signature = swapword(VMFH_SIG);
             FileUtil_Write(file->fd,
-                (char*)&file->fileHdr.v1,
+                (genptr)&file->fileHdr.v1,
                 sizeof(file->fileHdr.v1),
                 &bytesWritten);
             if (bytesWritten != sizeof(file->fileHdr.v1))

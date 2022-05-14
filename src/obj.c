@@ -31,19 +31,15 @@
  *	byte-swapping the components of same.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: obj.c,v 3.29 96/06/10 12:09:07 adam Exp $";
-#endif lint
 
+#include "config.h"
 #include "glue.h"
-
-#include <objfmt.h>
+#include "objfmt.h"
 #include "msobj.h"
 #include "obj.h"
 #include "sym.h"
-#include <objSwap.h>
-#include <st.h>
-#include <errno.h>
+#include "objSwap.h"
+#include "st.h"
 
 /***********************************************************************
  *				Obj_Open
@@ -660,28 +656,28 @@ void Obj_PrintType(FILE* stream, VMHandle file, void* base, word type)
         switch (type & 0xff00)
         {
             case OTYPE_INT:
-                fprintf(stream, "int(%d)", (type & 0xfe) >> 1);
+                fgprintf(stream, "int(%d)", (type & 0xfe) >> 1);
                 break;
             case OTYPE_SIGNED:
-                fprintf(stream, "signed(%d)", (type & 0xfe) >> 1);
+                fgprintf(stream, "signed(%d)", (type & 0xfe) >> 1);
                 break;
             case OTYPE_NEAR:
-                fprintf(stream, "near");
+                fgprintf(stream, "near");
                 break;
             case OTYPE_FAR:
-                fprintf(stream, "far");
+                fgprintf(stream, "far");
                 break;
             case OTYPE_CHAR:
-                fprintf(stream, "char(%d)", (type & 0xfe) >> 1);
+                fgprintf(stream, "char(%d)", (type & 0xfe) >> 1);
                 break;
             case OTYPE_VOID:
-                fprintf(stream, "void");
+                fgprintf(stream, "void");
                 break;
             case OTYPE_PTR:
-                fprintf(stream, "%cptr", (type & 0xfe) >> 1);
+                fgprintf(stream, "%cptr", (type & 0xfe) >> 1);
                 break;
             case OTYPE_BITFIELD:
-                fprintf(stream, "bitfield");
+                fgprintf(stream, "bitfield");
                 break;
         }
     }
@@ -694,14 +690,14 @@ void Obj_PrintType(FILE* stream, VMHandle file, void* base, word type)
             VMHandle oidfile = UtilGetIDFile();
 
             UtilSetIDFile(file);
-            fprintf(stream, "struct(%i)", OTYPE_STRUCT_ID(t));
+            fgprintf(stream, "struct(%i)", OTYPE_STRUCT_ID(t));
             UtilSetIDFile(oidfile);
         }
         else if (OTYPE_IS_PTR(t->words[0]))
         {
-            fprintf(stream, "%cptr(", OTYPE_PTR_TYPE(t->words[0]));
+            fgprintf(stream, "%cptr(", OTYPE_PTR_TYPE(t->words[0]));
             Obj_PrintType(stream, file, base, t->words[1]);
-            fprintf(stream, ")");
+            fgprintf(stream, ")");
         }
         else
         {
@@ -722,9 +718,9 @@ void Obj_PrintType(FILE* stream, VMHandle file, void* base, word type)
             }
             nels += len;
 
-            fprintf(stream, "%d array(", nels);
+            fgprintf(stream, "%d array(", nels);
             Obj_PrintType(stream, file, base, t->words[1]);
-            fprintf(stream, ")");
+            fgprintf(stream, ")");
         }
     }
 }
@@ -1047,7 +1043,7 @@ static void ObjAllocSymBlock(ObjETSData* dp) /* Data describing state of
     dp->symSize = OBJ_MAX_SYMS;
 
     osh = (ObjSymHeader*)VMLock(symbols, dp->syms, &dp->mem);
-    osh->next = (VMBlockHandle)NULL;
+    osh->next = (VMBlockHandle)0;
     osh->types = dp->types;
     osh->num = (dp->symSize - sizeof(ObjSymHeader)) / sizeof(ObjSym);
     dp->sd->symT = dp->syms;
@@ -1577,11 +1573,11 @@ static int ObjEnterStruct(VMHandle fh, /* Object file */
                     dp->file,
                     otherOS->name,
                     fs1->name);
-                fprintf(stderr, "Type ");
+                fgprintf(stderr, "Type ");
                 Obj_PrintType(stderr, symbols, otherTBase, fs1->u.sField.type);
-                fprintf(stderr, " not same as type ");
+                fgprintf(stderr, " not same as type ");
                 Obj_PrintType(stderr, fh, dp->tbase, os->u.sField.type);
-                fprintf(stderr, ".\n");
+                fgprintf(stderr, ".\n");
                 retval = 0;
                 break;
             }

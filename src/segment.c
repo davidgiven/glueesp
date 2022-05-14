@@ -35,14 +35,10 @@
  *	establish the proper ordering when the first module is loaded.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: segment.c,v 3.9 95/04/18 13:07:07 jon Exp $";
-#endif lint
 
 #include "glue.h"
 #include "sym.h"
-
-#include <objfmt.h> /* For segment type codes */
+#include "objfmt.h" /* For segment type codes */
 
 SegDesc** seg_Segments; /* All known segments. Enlarged at need */
 SegInfo* seg_Info;      /* one entry per segment */

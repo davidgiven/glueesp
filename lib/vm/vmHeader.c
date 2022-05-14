@@ -25,18 +25,9 @@
  *	BYTE-ORDER. THE CALLER MUST BE AWARE OF THIS.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmHeader.c,v 1.4 92/07/17 19:35:24 adam Exp $";
-#endif lint
 
-#include <config.h>
-
-#include <fcntl.h>
+#include "config.h"
 #include "vmInt.h"
-#include <compat/file.h>
-#if defined(__HIGHC__) || defined(_WIN32) || defined(__WATCOMC__)
-#include <stdio.h>
-#endif
 
 /***********************************************************************
  *				VMGetHeader
@@ -55,7 +46,7 @@ static char* rcsid = "$Id: vmHeader.c,v 1.4 92/07/17 19:35:24 adam Exp $";
  *	ardeb	1/ 2/90		Initial Revision
  *
  ***********************************************************************/
-void VMGetHeader(VMHandle vmHandle, genptr gfhPtr)
+void VMGetHeader(VMHandle vmHandle, void* gfhPtr)
 {
     VMFilePtr file = (VMFilePtr)vmHandle;
 
@@ -87,11 +78,10 @@ void VMGetHeader(VMHandle vmHandle, genptr gfhPtr)
  *	ardeb	1/ 2/90		Initial Revision
  *
  ***********************************************************************/
-void VMSetHeader(VMHandle vmHandle, genptr gfhPtr)
+void VMSetHeader(VMHandle vmHandle, void* gfhPtr)
 {
     VMFilePtr file = (VMFilePtr)vmHandle;
     long bytesWritten = 0;
-    int seekPos = 0;
 
     FileUtil_Seek(file->fd, 0L, SEEK_SET);
     if (file->flags & VM_2_0)

@@ -23,22 +23,26 @@
 #ifndef _GLUE_H_
 #define _GLUE_H_
 
-#include <config.h>
 #include <assert.h>
 
-#include <st.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdarg.h>
-#include <compat/string.h>
+#include <stddef.h>
+#include <string.h>
+#include <unistd.h>
 
-#include <os90.h>
+#include "config.h"
+#include "st.h"
+#include "objfmt.h"
+#include "gprintf.h"
 
-#include <objfmt.h>
-#include <malloc.h>
-typedef int Boolean;
+typedef bool Boolean;
 #ifndef FALSE
-#define FALSE (0)
-#define TRUE (!FALSE)
+#define FALSE false
+#define TRUE true
 #endif
 
 #define TEST_NRELS 0
@@ -66,13 +70,6 @@ extern int geosRelease; /* Major number of PC/GEOS release for which
                          * we're linking */
 
 extern int dbcsRelease; /* non-zero if DBCS release */
-
-#include <compat/stdlib.h>
-
-#ifndef TRUE
-#define FALSE 0
-#define TRUE (!FALSE)
-#endif
 
 #if defined(sparc) || defined(mc68000)
 /*
@@ -106,8 +103,14 @@ extern int dbcsRelease; /* non-zero if DBCS release */
 #define DOSWAP
 
 #else
-#define swapsp(p) (*(p))
-#define swaplp(p) (*(p))
+#define swapsp(p) \
+    do            \
+    {             \
+    } while (0)
+#define swaplp(p) \
+    do            \
+    {             \
+    } while (0)
 #define swaps(s) (s)
 #define swapl(l) (l)
 #endif

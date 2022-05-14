@@ -17,11 +17,8 @@
  *	Return info about a VM block
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmInfo.c,v 3.2 92/06/22 15:32:11 jimmy Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 
 /***********************************************************************

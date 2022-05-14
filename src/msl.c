@@ -43,18 +43,14 @@
  *
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: msl.c,v 1.7 93/08/13 19:00:49 jon Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "msobj.h"
 #include "obj.h"
 #include "output.h"
 #include "sym.h"
-#include <objfmt.h>
-#include <compat/file.h>
+#include "objfmt.h"
 
 /*
  * Structure describing what's been loaded from a library. The thing

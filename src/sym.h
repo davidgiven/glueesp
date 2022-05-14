@@ -75,8 +75,7 @@ typedef struct _SymUndef
     VMBlockHandle table;    /* Expected symbol table (error if not and
                              * table doesn't belong to global scope) */
     ObjSym sym;             /* Symbol itself */
-    ObjType types[LABEL_IN_STRUCT];
-    /* Start of any copied type descriptions */
+    ObjType types[];        /* Start of any copied type descriptions */
 } SymUndef;
 
 extern SymUndef* symUndefHead;

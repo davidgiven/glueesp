@@ -22,14 +22,10 @@
  *	MS-DOS executable).
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: com.c,v 2.5 91/12/12 12:10:59 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "output.h"
-#include <compat/file.h>
 
 /* Goddamn HighC won't let me use my nice typedefs... */
 static int ComPrepare(char*, char*, char*);

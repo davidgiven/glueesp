@@ -38,9 +38,6 @@
  *	they'll need run-time relocations.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: codeview.c,v 1.20 95/11/08 17:23:04 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "codeview32.h"
@@ -48,7 +45,7 @@ static char* rcsid = "$Id: codeview.c,v 1.20 95/11/08 17:23:04 adam Exp $";
 #include "obj.h"
 #include "sym.h"
 #include "cv.h"
-#include <objfmt.h>
+#include "objfmt.h"
 
 /*
  * Values placed in segments vector for symbol and type segments. Most of
@@ -972,18 +969,16 @@ static word CV32ProcessStructure(
     //    CTL_LIST
     //				     * record */
     //		    *nlistBase;	    /* Base of data in said record */
-    word nlistLen;        /* Total length of data in said record */
-    unsigned long i;      /* Index of current field */
-    byte* nextBFType = 0; /* Start of CTL_BITFIELD record to use for
-                           * the next bitfield in the structure */
-    MemHandle mem;        /* Memory handle for tsymBlock */
-    genptr symBase;       /* Base of locked tsymBlock */
-    ObjSym* os;           /* Symbol being created in block */
-    word ssymOff,         /* Offset of structure symbol in block */
-        fsymOff;          /* Offset of current field symbol in
-                           * block */
-    byte ssymType;        /* OSYM_STRUCT or OSYM_UNION, telling
-                           * symbol type for structured type */
+    // word nlistLen;   /* Total length of data in said record */
+    unsigned long i; /* Index of current field */
+    MemHandle mem;   /* Memory handle for tsymBlock */
+    genptr symBase;  /* Base of locked tsymBlock */
+    ObjSym* os;      /* Symbol being created in block */
+    word ssymOff,    /* Offset of structure symbol in block */
+        fsymOff;     /* Offset of current field symbol in
+                      * block */
+    byte ssymType;   /* OSYM_STRUCT or OSYM_UNION, telling
+                      * symbol type for structured type */
     ID ssymName;
     byte symFlags;
 
@@ -1062,7 +1057,7 @@ static word CV32ProcessStructure(
         prefix = "struct ";
         namelen = strlen(prefix) + strlen(tname);
         name = (char*)malloc(namelen + 1);
-        sprintf(name, "%s%s", prefix, (char*)tname);
+        sgprintf(name, "%s%s", prefix, (char*)tname);
 
         typeName = ST_Enter(symbols, strings, name, namelen);
         symFlags = 0; /* Not nameless */
@@ -1098,76 +1093,90 @@ static word CV32ProcessStructure(
      * won't happen if some of the fields are structures in their own right.
      */
 #if 0
-	for (i = 0; i < nfields; i++) {
+    {
+        byte* nextBFType = 0; /* Start of CTL_BITFIELD record to use for
+                               * the next bitfield in the structure */
 
-		word thisLeaf;
-		word typeIndex;
-		word thislen;
-		word thisOffset;
+        for (i = 0; i < nfields; i++)
+        {
 
-		// process thetre data records here
-		MSObj_GetWord(thisLeaf, tlistp);
-		tlistLen -= 2;
+            word thisLeaf;
+            word typeIndex;
+            word thislen;
+            word thisOffset;
 
-		// expect member
-		if (thisLeaf != CTL2_MEMBER) {
+            // process thetre data records here
+            MSObj_GetWord(thisLeaf, tlistp);
+            tlistLen -= 2;
 
-			Notify(NOTIFY_ERROR, "%s: invalid member field", file);
-			return(OTYPE_VOID | OTYPE_SPECIAL);
-		}
+            // expect member
+            if (thisLeaf != CTL2_MEMBER)
+            {
 
-		MSObj_GetWord(typeIndex, tlistp);
-		tlistLen -= 2;
+                Notify(NOTIFY_ERROR, "%s: invalid member field", file);
+                return (OTYPE_VOID | OTYPE_SPECIAL);
+            }
 
-		types[i] = CVLocateType(typeIndex, &thislen);
+            MSObj_GetWord(typeIndex, tlistp);
+            tlistLen -= 2;
 
-	if ((types[i] == (OTYPE_BITFIELD | OTYPE_SPECIAL)) &&
-	    ((types[i] & OTYPE_BF_WIDTH) == 0))
-	{
-	    /*
-	     * If the thing's a bitfield that's not been decoded yet, locate
-	     * the proper BITFIELD record (thanks, HighC) and set up the
-	     * special type appropriately. Why do I thank HighC? Because their
-	     * compiler generates a type list for a structure where the
-	     * type indices for all bitfields are 1. All the CTL_BITFIELD
-	     * records are emitted just before the fieldtype list, however,
-	     * so we go questing for all those little records and use them
-	     * in sequence...yuck.
-	     */
-	    if (nextBFType == 0) {
-		/*
-		 * Haven't bothered to locate the first CTL_BITFIELD record
-		 * before the type list. Do so now.
-		 */
-		byte	*tp;
-		byte	lastType;
-		byte	thisType;
-		word	len;
+            types[i] = CVLocateType(typeIndex, &thislen);
 
-		lastType = CTL_STRUCTURE;
+            if ((types[i] == (OTYPE_BITFIELD | OTYPE_SPECIAL)) &&
+                ((types[i] & OTYPE_BF_WIDTH) == 0))
+            {
+                /*
+                 * If the thing's a bitfield that's not been decoded yet, locate
+                 * the proper BITFIELD record (thanks, HighC) and set up the
+                 * special type appropriately. Why do I thank HighC? Because
+                 * their compiler generates a type list for a structure where
+                 * the type indices for all bitfields are 1. All the
+                 * CTL_BITFIELD records are emitted just before the fieldtype
+                 * list, however, so we go questing for all those little records
+                 * and use them in sequence...yuck.
+                 */
+                if (nextBFType == 0)
+                {
+                    /*
+                     * Haven't bothered to locate the first CTL_BITFIELD record
+                     * before the type list. Do so now.
+                     */
+                    byte* tp;
+                    byte lastType;
+                    byte thisType;
+                    word len;
 
-		for (tp = typeSeg; tp < tlistBase; tp += len) {
-		    tp++;	/* Skip linkage, damn you */
-		    MSObj_GetWord(len, tp);
-		    thisType = *tp;
-		    if ((thisType==CTL_BITFIELD) && (lastType!=CTL_BITFIELD)) {
-			nextBFType = tp-3;
-		    }
-		    lastType = thisType;
-		}
-	    }
-	    if ((nextBFType == 0) || (nextBFType[3] != CTL_BITFIELD)) {
-		Notify(NOTIFY_ERROR, "%s: invalid structure descriptor (no bitfield descriptor before field-type list)", file);
-		return(OTYPE_VOID | OTYPE_SPECIAL);
-	    }
+                    lastType = CTL_STRUCTURE;
 
-	    nextBFType += 3;
-	    types[i] =
-		CVProcessTypeRecord(file,
-				    &nextBFType,
-				    nextBFType[-2] | (nextBFType[-1] << 8),
-				    ttypeBlock);
-	}
+                    for (tp = typeSeg; tp < tlistBase; tp += len)
+                    {
+                        tp++; /* Skip linkage, damn you */
+                        MSObj_GetWord(len, tp);
+                        thisType = *tp;
+                        if ((thisType == CTL_BITFIELD) &&
+                            (lastType != CTL_BITFIELD))
+                        {
+                            nextBFType = tp - 3;
+                        }
+                        lastType = thisType;
+                    }
+                }
+                if ((nextBFType == 0) || (nextBFType[3] != CTL_BITFIELD))
+                {
+                    Notify(NOTIFY_ERROR,
+                        "%s: invalid structure descriptor (no bitfield "
+                        "descriptor before field-type list)",
+                        file);
+                    return (OTYPE_VOID | OTYPE_SPECIAL);
+                }
+
+                nextBFType += 3;
+                types[i] = CVProcessTypeRecord(file,
+                    &nextBFType,
+                    nextBFType[-2] | (nextBFType[-1] << 8),
+                    ttypeBlock);
+            }
+        }
     }
 #endif
 
@@ -1198,14 +1207,12 @@ static word CV32ProcessStructure(
         // if (*nlistp != CTL_STRING) {
         //     Notify(NOTIFY_ERROR,
         //	   "%s: invalid structure descriptor (field name not CTL_STRING
-        //tree)", 	   file);
+        // tree)", 	   file);
         //     break;
         // }
 
         word thisLeaf;
         word typeIndex;
-        word thislen;
-        word thisOffset;
         word offset;
         word attr;
         byte pad;
@@ -1523,7 +1530,7 @@ static word CV32ProcessScalar(const char* file, /* Object file from which
             prefix = "enum ";
             namelen = strlen(prefix) + strlen(tname);
             newName = (char*)malloc(namelen + 1);
-            sprintf(newName, "%s%s", prefix, (char*)tname);
+            sgprintf(newName, "%s%s", prefix, (char*)tname);
 
             typeName = ST_Enter(symbols, strings, newName, namelen);
             ST_Unlock(symbols, name);
@@ -1564,7 +1571,7 @@ static word CV32ProcessScalar(const char* file, /* Object file from which
         /*
          * Locate the CTL_LIST record that holds the list of members
          */
-        bp = &fieldTypeIndex;
+        bp = (genptr)&fieldTypeIndex;
         if (!CV32LocateList(file, &bp, &mlistBase, &mlistLen))
         {
             goto error;
@@ -2209,7 +2216,7 @@ static word CV32ProcessTypeRecord(const char* file, /* Object file from which
                 break;
             }
             default:
-                printf("ERROR: Unable to parse %x type\r\n", leaf);
+                gprintf("ERROR: Unable to parse %x type\r\n", leaf);
         }
     }
 
@@ -3039,7 +3046,7 @@ static void CV32ProcessSymbols(
                     {
                         char blockName[32];
 
-                        sprintf(blockName, "??block%d", blockCount++);
+                        sgprintf(blockName, "??block%d", blockCount++);
                         os->name = ST_EnterNoLen(symbols, strings, blockName);
                     }
                     os->type = OSYM_BLOCKSTART;
@@ -3543,7 +3550,7 @@ static void CV32ProcessSymbols(
 		    } else {
 			char	blockName[32];
 
-			sprintf(blockName, "??block%d", blockCount++);
+			sgprintf(blockName, "??block%d", blockCount++);
 			os->name = ST_EnterNoLen(symbols, strings,
 						 blockName);
 		    }

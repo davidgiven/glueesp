@@ -17,11 +17,8 @@
  *	Free a VM block
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmFree.c,v 1.6 91/04/26 11:52:39 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 
 /***********************************************************************

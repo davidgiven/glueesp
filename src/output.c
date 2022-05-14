@@ -32,9 +32,6 @@
  *	Functions for manipulating the output file.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: output.c,v 3.14 95/11/08 17:23:51 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "geo.h" /* for protocol relocations (alas) */
@@ -256,7 +253,7 @@ static void OutPrintByName(FILE* mf) /* Stream open to map file */
     int j;
     AddrSym* syms;
 
-    fprintf(mf, "  Address         Publics by Name\n\n");
+    fgprintf(mf, "  Address         Publics by Name\n\n");
 
     syms = (AddrSym*)malloc(numAddrSyms * sizeof(AddrSym));
 
@@ -311,7 +308,7 @@ static void OutPrintByName(FILE* mf) /* Stream open to map file */
 
     for (i = 0; i < j; i++)
     {
-        fprintf(mf,
+        fgprintf(mf,
             " %04X:%04X       %i\n",
             syms[i].frame,
             syms[i].offset,
@@ -320,7 +317,7 @@ static void OutPrintByName(FILE* mf) /* Stream open to map file */
 
     free((void*)syms);
 
-    fprintf(mf, "\n");
+    fgprintf(mf, "\n");
 }
 
 /***********************************************************************
@@ -345,7 +342,7 @@ static void OutPrintByAddr(FILE* mf) /* Stream open to map file */
 {
     int i;
 
-    fprintf(mf, "  Address         Publics by Value\n\n");
+    fgprintf(mf, "  Address         Publics by Value\n\n");
 
     for (i = 0; i < seg_NumSegs; i++)
     {
@@ -377,7 +374,7 @@ static void OutPrintByAddr(FILE* mf) /* Stream open to map file */
                     case OSYM_CLASS:
                     case OSYM_MASTER_CLASS:
                     case OSYM_VARIANT_CLASS:
-                        fprintf(mf,
+                        fgprintf(mf,
                             " %04X:%04X       %i\n",
                             sd->pdata.frame,
                             os->u.addrSym.address,
@@ -423,8 +420,8 @@ void Out_DosMap(char* mapfile, long imgBase)
     }
     else
     {
-        fprintf(mf, "\n");
-        fprintf(mf, " Start  Stop   Length Name                   Class\n");
+        fgprintf(mf, "\n");
+        fgprintf(mf, " Start  Stop   Length Name                   Class\n");
         for (i = 1; i < seg_NumSegs; i++)
         {
             sd = seg_Segments[i];
@@ -432,8 +429,8 @@ void Out_DosMap(char* mapfile, long imgBase)
             if (sd->combine != SEG_GLOBAL && sd->combine != SEG_ABSOLUTE &&
                 sd->combine != SEG_LIBRARY)
             {
-                fprintf(mf,
-                    " %05lXH %05lXH %05XH %-22li %i\n",
+                fgprintf(mf,
+                    " %05lXH %05lXH %05XH %-22i %i\n",
                     sd->foff - imgBase,
                     sd->size == 0 ? 0 : (sd->foff + sd->size - imgBase) - 1,
                     sd->size,
@@ -441,17 +438,17 @@ void Out_DosMap(char* mapfile, long imgBase)
                     sd->class);
             }
         }
-        fprintf(mf, "\n");
+        fgprintf(mf, "\n");
         if (seg_NumGroups)
         {
-            fprintf(mf, " Origin   Group\n");
+            fgprintf(mf, " Origin   Group\n");
             for (i = 0; i < seg_NumGroups; i++)
             {
                 GroupDesc* gd = seg_Groups[i];
 
-                fprintf(mf, " %04X:0   %i\n", gd->pdata.frame, gd->name);
+                fgprintf(mf, " %04X:0   %i\n", gd->pdata.frame, gd->name);
             }
-            fprintf(mf, "\n");
+            fgprintf(mf, "\n");
         }
 
         OutPrintByName(mf);
@@ -653,17 +650,17 @@ void Out_FinishLineBlock(SegDesc* sd, VMBlockHandle block)
  *	ardeb	3/20/90		Initial Revision
  *
  ***********************************************************************/
-void Out_AddLines(char* file, /* Name of file containing line map to
-                               * be added */
-    VMHandle fh,              /* Handle containing lines. May be
-                               * "symbols" */
-    SegDesc* sd,              /* Segment in symbols to which to
-                               * append the lines */
-    VMBlockHandle lineMap,    /* Block mapping lines to append */
-    word reloc,               /* Relocation factor for the line
-                               * numbers */
-    Boolean doSrcMap)         /* TRUE if no entries in the src map
-                               * for these line numbers. */
+void Out_AddLines(const char* file, /* Name of file containing line map to
+                                     * be added */
+    VMHandle fh,                    /* Handle containing lines. May be
+                                     * "symbols" */
+    SegDesc* sd,                    /* Segment in symbols to which to
+                                     * append the lines */
+    VMBlockHandle lineMap,          /* Block mapping lines to append */
+    word reloc,                     /* Relocation factor for the line
+                                     * numbers */
+    Boolean doSrcMap)               /* TRUE if no entries in the src map
+                                     * for these line numbers. */
 {
     ObjLineHeader* olh; /* Header of current block */
     ObjLineHeader* olhn;

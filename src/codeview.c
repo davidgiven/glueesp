@@ -38,17 +38,15 @@
  *	they'll need run-time relocations.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: codeview.c,v 1.20 95/11/08 17:23:04 adam Exp $";
-#endif lint
 
+#include "config.h"
 #include "glue.h"
 #include "codeview.h"
 #include "msobj.h"
 #include "obj.h"
 #include "sym.h"
 #include "cv.h"
-#include <objfmt.h>
+#include "objfmt.h"
 
 /*
  * Values placed in segments vector for symbol and type segments. Most of
@@ -2539,7 +2537,7 @@ static void CVProcessSymbols(
                     {
                         char blockName[32];
 
-                        sprintf(blockName, "??block%d", blockCount++);
+                        sgprintf(blockName, "??block%d", blockCount++);
                         os->name = ST_EnterNoLen(symbols, strings, blockName);
                     }
                     os->type = OSYM_BLOCKSTART;

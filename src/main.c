@@ -26,48 +26,21 @@
  *	won't fit anywhere else.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: main.c,v 3.49 96/07/08 17:28:12 tbradley Exp $";
-#endif lint
 
-#include <config.h>
 #include "glue.h"
 #include "obj.h"
 #include "output.h"
 #include "sym.h"
 #include "geo.h"
 #include "library.h"
-
-#define Boolean SpriteBoolean
-#define Address SpriteAddress
-#include <hash.h>
-#undef Boolean
-#undef Address
-
-#include <fileargs.h>
-#include <compat/string.h>
-#include <vector.h>
+#include "hash.h"
+#include "fileargs.h"
+#include "vector.h"
 #include <errno.h>
-#if defined(unix)
 #include <sys/signal.h>
-#endif
 #include <ctype.h>
-#include <compat/stdlib.h>
 #include <string.h>
-
-#if defined _WIN32
-unsigned long __stdcall GetTickCount(void);
-#else
 #include <time.h>
-#endif /* defined _WIN32 */
-
-/*
- *The malloc functions are using fprintf as a callback and since
- *the Sun headers suck here's the prototype
- */
-#if defined(unix)
-extern int fprintf(FILE* stream, char* format, ...);
-#endif /*defined(unix)*/
 
 word serialNumber;
 FileOps* fileOps;
@@ -246,14 +219,14 @@ void RenameFileSrcMapEntry(ID oldName, ID newName)
 {
     Hash_Entry *he, *he2;
     Boolean new;
-    Vector v, v2;
+    Vector v;
 
-    he = Hash_FindEntry(&tsrcMap, (SpriteAddress)oldName);
+    he = Hash_FindEntry(&tsrcMap, (Address)oldName);
     if (he)
     {
         v = Hash_GetValue(he);
         Hash_SetValue(he, NULL);
-        he2 = Hash_CreateEntry(&tsrcMap, (SpriteAddress)newName, &new);
+        he2 = Hash_CreateEntry(&tsrcMap, (Address)newName, &new);
 
         if (!new)
         {
@@ -262,7 +235,7 @@ void RenameFileSrcMapEntry(ID oldName, ID newName)
 
             /* Append entries from the one entry to the existing
              * vector. */
-            v2 = Hash_GetValue(he2);
+            // v2 = Hash_GetValue(he2);
 
             for (tsme = (TSrcMapEntry*)Vector_Data(v), i = 0;
                  i < Vector_Length(v);
@@ -314,7 +287,7 @@ void AddSrcMapEntry(ID fileName, SegDesc* sd, int start, int end)
     /*
      * Find or create the entry for this file in the range map we're building.
      */
-    he = Hash_CreateEntry(&tsrcMap, (SpriteAddress)fileName, &new);
+    he = Hash_CreateEntry(&tsrcMap, (Address)fileName, &new);
     if (new)
     {
         /*
@@ -454,7 +427,7 @@ void AddSrcMapEntry(ID fileName, SegDesc* sd, int start, int end)
  *	ardeb	11/ 8/89	Initial Revision
  *
  ***********************************************************************/
-static void CleanUp(void)
+static void CleanUp(int)
 {
     (void)unlink(outfile);
     (void)unlink(symfile);
@@ -492,9 +465,9 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
          * Record another error as having happened
          */
 #if defined(unix)
-        fprintf(stderr, "error: ");
+        fgprintf(stderr, "error: ");
 #else
-        fprintf(stderr, "Error ");
+        fgprintf(stderr, "Error ");
 #endif
         errors++;
     }
@@ -504,9 +477,9 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
          * Tell the user this is only a warning.
          */
 #if defined(unix)
-        fprintf(stderr, "warning: ");
+        fgprintf(stderr, "warning: ");
 #else
-        fprintf(stderr, "Warning ");
+        fgprintf(stderr, "Warning ");
 #endif
     }
     else if (why == NOTIFY_DEBUG && !debug)
@@ -520,7 +493,7 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
     /*
      * Send the message to stderr
      */
-    vfprintf(stderr, fmt, args);
+    vfgprintf(stderr, fmt, args);
 
     /*
      * If not a debug message, spew a newline out too.
@@ -835,30 +808,30 @@ volatile void usage(char* cmd, char* msg)
      */
     if (msg != NULL)
     {
-        fprintf(stderr, "%s: %s\n", cmd, msg);
+        fgprintf(stderr, "%s: %s\n", cmd, msg);
     }
 
     /*
      * Provide usage summary
      */
-    fprintf(stderr, "usage: %s <flags> <objFile>+ [-l<objFile>]*\n", cmd);
-    fprintf(
+    fgprintf(stderr, "usage: %s <flags> <objFile>+ [-l<objFile>]*\n", cmd);
+    fgprintf(
         stderr, "Those obj files passed in with a -l flag are only linked \n");
-    fprintf(stderr, "in if they actually contain referenced symbols\n");
-    fprintf(stderr, "Flags for all types of output files:\n");
+    fgprintf(stderr, "in if they actually contain referenced symbols\n");
+    fgprintf(stderr, "Flags for all types of output files:\n");
     for (i = 0; i < sizeof(others) / sizeof(others[0]); i++)
     {
-        fprintf(stderr, "\t%-15s%s\n", others[i].flag, others[i].msg);
+        fgprintf(stderr, "\t%-15s%s\n", others[i].flag, others[i].msg);
     }
-    fprintf(stderr, "\n");
-    fprintf(stderr, "File Type   Output Flag     Other Flags\n");
-    fprintf(stderr, "---------------------------------------\n");
+    fgprintf(stderr, "\n");
+    fgprintf(stderr, "File Type   Output Flag     Other Flags\n");
+    fgprintf(stderr, "---------------------------------------\n");
     for (i = 0; i < sizeof(outTypes) / sizeof(outTypes[0]); i++)
     {
         FileOps* ops = outTypes[i].ops;
         int j;
 
-        fprintf(stderr,
+        fgprintf(stderr,
             ".%-11s-O%c %-12s",
             ops->suffix,
             outTypes[i].spec,
@@ -871,10 +844,10 @@ volatile void usage(char* cmd, char* msg)
                 switch (ops->options[j].type)
                 {
                     case OPT_NOARG:
-                        fprintf(stderr, " -%c", ops->options[j].opt);
+                        fgprintf(stderr, " -%c", ops->options[j].opt);
                         break;
                     case OPT_INTARG:
-                        fprintf(stderr,
+                        fgprintf(stderr,
                             " -%c <%s>",
                             ops->options[j].opt,
                             (char*)(ops->options[j].argName
@@ -882,7 +855,7 @@ volatile void usage(char* cmd, char* msg)
                                         : "n"));
                         break;
                     case OPT_STRARG:
-                        fprintf(stderr,
+                        fgprintf(stderr,
                             " -%c <%s>",
                             ops->options[j].opt,
                             (char*)(ops->options[j].argName
@@ -892,7 +865,7 @@ volatile void usage(char* cmd, char* msg)
                 }
             }
         }
-        fprintf(stderr, "\n");
+        fgprintf(stderr, "\n");
     }
 
     /*
@@ -1394,7 +1367,7 @@ static void InterPass(char* outfile, /* Name of output file */
                             VMUnlockDirty(symbols, block);
                         }
 
-                        he = Hash_FindEntry(&tsrcMap, (SpriteAddress)fileName);
+                        he = Hash_FindEntry(&tsrcMap, (Address)fileName);
                         assert(he != 0);
                         v = (Vector)Hash_GetValue(he);
                         tsmeBase = (TSrcMapEntry*)Vector_Data(v);
@@ -2005,8 +1978,7 @@ byte ConvertHexDigit(char num)
  *	ardeb	9/29/89		Initial Revision
  *
  ***********************************************************************/
-void main(argc, argv) int argc;
-char** argv;
+int main(int argc, char** argv)
 {
     char* paramfile; /* Name of file containing geode
                       * parameters */
@@ -2039,12 +2011,6 @@ char** argv;
     }
 
     leaveSymOnErr = FALSE;
-
-    /*
-     * We don't want to know about failed malloc's as we won't do anything
-     * about them except dereference the NULL they return and die horribly.
-     */
-    malloc_noerr(1);
 
 #if defined(unix)
     /*
@@ -2137,7 +2103,7 @@ char** argv;
 
                 if (fileOps != NULL)
                 {
-                    sprintf(msg, "%s file already specified", fileOps->suffix);
+                    sgprintf(msg, "%s file already specified", fileOps->suffix);
                     usage(argv[0], msg);
                 }
 
@@ -2151,7 +2117,7 @@ char** argv;
                 }
                 if (fileOps == NULL)
                 {
-                    sprintf(msg, "%s: output type unknown", argv[i]);
+                    sgprintf(msg, "%s: output type unknown", argv[i]);
                     usage(argv[0], msg);
                 }
                 if (fileOps->flags & FILE_NEEDPARAM)
@@ -2202,7 +2168,7 @@ char** argv;
                 {
                     char *src, *dest;
 
-                    if (strnlen_s((char*)argv[i + 1], COPYRIGHT_SIZE) ==
+                    if (strnlen((char*)argv[i + 1], COPYRIGHT_SIZE) ==
                         COPYRIGHT_SIZE)
                     {
                         Notify(NOTIFY_ERROR, "copyright notice is too long!");
@@ -2308,7 +2274,7 @@ char** argv;
                             case OPT_INTARG:
                                 if (ARG_MISSING)
                                 {
-                                    sprintf(
+                                    sgprintf(
                                         msg, "%s missing argument", argv[i]);
                                     usage(argv[0], msg);
                                 }
@@ -2321,7 +2287,7 @@ char** argv;
                             case OPT_STRARG:
                                 if (ARG_MISSING)
                                 {
-                                    sprintf(
+                                    sgprintf(
                                         msg, "%s missing argument", argv[i]);
                                     usage(argv[0], msg);
                                 }
@@ -2337,7 +2303,7 @@ char** argv;
                 }
                 if (!opt || opt->opt == 0)
                 {
-                    sprintf(msg, "%s: option unknown", argv[i]);
+                    sgprintf(msg, "%s: option unknown", argv[i]);
                     usage(argv[0], msg);
                 }
                 break;
@@ -2529,23 +2495,17 @@ char** argv;
 
     if (symbols == NULL)
     {
-        extern int sys_nerr;
         // extern char *sys_errlist[];
 
-        fprintf(stderr, "Couldn't open symbol file %s: ", symfile);
-        if (status <= sys_nerr)
-        {
-            // fprintf(stderr, "%s\n", sys_errlist[status]);
-        }
-        else
-        {
-            fprintf(stderr, "status = %d\n", status);
-        }
+        fgprintf(stderr,
+            "Couldn't open symbol file %s: %s",
+            symfile,
+            strerror(status));
         exit(1);
     }
 
     /*
-     * Set file for printf %i
+     * Set file for gprintf %i
      */
     UtilSetIDFile(symbols);
 
@@ -2707,9 +2667,8 @@ char** argv;
 
         if (df != NULL)
         {
-            malloc_printstats((malloc_printstats_callback*)fprintf, df);
             fclose(df);
-            fprintf(stderr, "pass1 memory stats dumped to %s\n", dumpfile);
+            fgprintf(stderr, "pass1 memory stats dumped to %s\n", dumpfile);
         }
     }
     InterPass(outfile, paramfile, mapfile);
@@ -2728,9 +2687,8 @@ char** argv;
 
         if (df != NULL)
         {
-            malloc_printstats((malloc_printstats_callback*)fprintf, df);
             fclose(df);
-            fprintf(stderr, "interpass memory stats dumped to %s\n", dumpfile);
+            fgprintf(stderr, "interpass memory stats dumped to %s\n", dumpfile);
         }
     }
 
@@ -2786,9 +2744,8 @@ char** argv;
 
         if (df != NULL)
         {
-            malloc_printstats((malloc_printstats_callback*)fprintf, df);
             fclose(df);
-            fprintf(stderr, "pass2 memory stats dumped to %s\n", dumpfile);
+            fgprintf(stderr, "pass2 memory stats dumped to %s\n", dumpfile);
         }
     }
 
@@ -2796,28 +2753,28 @@ char** argv;
     {
         GeosFileHeader2 gfh;
 
-        VMGetHeader(symbols, (char*)&gfh);
+        VMGetHeader(symbols, (genptr)&gfh);
         gfh.protocol.major = swaps(OBJ_PROTOCOL_MAJOR);
         gfh.protocol.minor = swaps(OBJ_PROTOCOL_MINOR);
         bcopy(OBJ_SYMTOKEN, gfh.token.chars, sizeof(gfh.token.chars));
         bcopy("GLUE", gfh.creator.chars, sizeof(gfh.creator.chars));
-        sprintf((char*)&(gfh.userNotes),
+        sgprintf((char*)&(gfh.userNotes),
             "%8s:%04d:%04d",
             GH(geodeName),
             serialNumber,
             GH(resCount));
-        VMSetHeader(symbols, (char*)&gfh);
+        VMSetHeader(symbols, (genptr)&gfh);
     }
     else
     {
         GeosFileHeader gfh;
 
-        VMGetHeader(symbols, (char*)&gfh);
+        VMGetHeader(symbols, (genptr)&gfh);
         gfh.core.protocol.major = swaps(OBJ_PROTOCOL_MAJOR);
         gfh.core.protocol.minor = swaps(OBJ_PROTOCOL_MINOR);
         bcopy(OBJ_SYMTOKEN, gfh.core.token.chars, sizeof(gfh.core.token.chars));
         bcopy("GLUE", gfh.core.creator.chars, sizeof(gfh.core.creator.chars));
-        VMSetHeader(symbols, (char*)&gfh);
+        VMSetHeader(symbols, (genptr)&gfh);
     }
 
     Final(outfile, warn_unref);
@@ -2835,9 +2792,8 @@ char** argv;
 
         if (df != NULL)
         {
-            malloc_printstats((malloc_printstats_callback*)fprintf, df);
             fclose(df);
-            fprintf(stderr, "final memory stats dumped to %s\n", dumpfile);
+            fgprintf(stderr, "final memory stats dumped to %s\n", dumpfile);
         }
     }
 

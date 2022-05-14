@@ -33,6 +33,8 @@ typedef word VMBlockHandle; /* Handle to block in VM file */
 typedef word VMID;          /* Identifier assigned to a
                              * VMBlockHandle by the user */
 
+#define NULLHANDLE ((VMHandle)0)
+
 #define SVMID_DB_MAP 0xff00
 #define SVMID_DB_GROUP 0xff01
 #define SVMID_DB_ITEM 0xff02
@@ -121,7 +123,7 @@ extern genptr VMLock(
 /*
  * Release a VM block, allowing it to go away, if necessary.
  */
-#define VMUnlock(vmHandle, vmBlock)
+static inline void VMUnlock(VMHandle vmHandle, VMBlockHandle vmBlock) {}
 
 /*
  * Mark a VM block as dirty, then unlock it. In a real implementation, this
@@ -183,8 +185,8 @@ extern void VMSetReloc(VMHandle vmHandle, VMRelocRoutine* reloc);
 /*
  * Functions to manipulate the standard geos file header on the file.
  */
-extern void VMGetHeader(VMHandle vmHandle, genptr gfhPtr);
-extern void VMSetHeader(VMHandle vmHandle, genptr gfhPtr);
+extern void VMGetHeader(VMHandle vmHandle, void* gfhPtr);
+extern void VMSetHeader(VMHandle vmHandle, void* gfhPtr);
 /*
  * Returns major version of PC/GEOS for which the file was created.
  */

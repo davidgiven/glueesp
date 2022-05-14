@@ -34,9 +34,6 @@
  *	Functions to deal with dynamic libraries under pc/geos
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: library.c,v 3.30 96/05/21 16:36:48 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "output.h"
@@ -472,7 +469,7 @@ void Library_ExportAs(char* name, char* alias, Boolean mustBeDefined)
         {
             char* name2 = (char*)malloc(1 + strlen(name) + 1);
 
-            sprintf(name2, "_%s", name);
+            sgprintf(name2, "_%s", name);
             ep->name = ST_LookupNoLen(symbols, strings, name2);
             free((malloc_t)name2);
         }
@@ -499,7 +496,7 @@ void Library_ExportAs(char* name, char* alias, Boolean mustBeDefined)
     {
         if (mustBeDefined)
         {
-            sprintf(message, "%s undefined4", name);
+            sgprintf(message, "%s undefined4", name);
             yyerror(message);
         }
         else
@@ -535,7 +532,7 @@ void Library_ExportAs(char* name, char* alias, Boolean mustBeDefined)
             {
                 if (ep->alias == aname)
                 {
-                    sprintf(message, "%s is already exported", alias);
+                    sgprintf(message, "%s is already exported", alias);
                     yyerror(message);
                     return;
                 }
@@ -594,7 +591,7 @@ void Library_ExportAs(char* name, char* alias, Boolean mustBeDefined)
                      */
                     break;
                 default:
-                    sprintf(yystr,
+                    sgprintf(yystr,
                         "%i is not of a type that my be exported",
                         sym->name);
                     yyerror(yystr);
@@ -818,13 +815,13 @@ void Library_MarkPublished(char* name)
 
     if (id == NullID)
     {
-        sprintf(message, "%s undefined, so can't be published", name);
+        sgprintf(message, "%s undefined, so can't be published", name);
         yyerror(message);
         return;
     }
     else if (!Sym_FindWithSegment(symbols, id, &symBlock, &symOff, TRUE, &sd))
     {
-        sprintf(
+        sgprintf(
             message, "Can't find symbol for %s, so can't be published", name);
         yyerror(message);
         return;
@@ -878,7 +875,7 @@ void Library_MarkPublished(char* name)
         osh = (ObjSymHeader*)VMLock(ldf, seg->syms, (MemHandle*)NULL);
 
         osh->types = ldfTypes;
-        osh->seg = (int)seg - (int)hdr;
+        osh->seg = (uintptr_t)seg - (uintptr_t)hdr;
         osh->next = 0;
         osh->num = 1;
 
@@ -1203,7 +1200,7 @@ void Library_Publish(VMHandle fh, /* File handle of passed blocks */
                         frameHeader = (ObjSymHeader*)VMLock(
                             ldf, frameSeg->syms, (MemHandle*)NULL);
                         frameHeader->types = ldfTypes;
-                        frameHeader->seg = (int)frameSeg - (int)hdr;
+                        frameHeader->seg = (uintptr_t)frameSeg - (uintptr_t)hdr;
                         frameHeader->next = 0;
                         frameHeader->num = 0;
                         VMUnlock(ldf, frameSeg->syms);
@@ -1217,7 +1214,7 @@ void Library_Publish(VMHandle fh, /* File handle of passed blocks */
                      * find it, we'll copy it in.
                      */
 
-                    destRel->frame = (int)frameSeg - (int)hdr;
+                    destRel->frame = (uintptr_t)frameSeg - (uintptr_t)hdr;
 
                     frameHeader =
                         (ObjSymHeader*)VMLock(ldf, frameSeg->syms, &frameMem);
@@ -1251,7 +1248,8 @@ void Library_Publish(VMHandle fh, /* File handle of passed blocks */
                     }
 
                     destRel->symBlock = frameSeg->syms;
-                    destRel->symOff = (int)frameSym - (int)frameHeader;
+                    destRel->symOff =
+                        (uintptr_t)frameSym - (uintptr_t)frameHeader;
 
                     VMUnlockDirty(ldf, frameSeg->syms);
                     VMUnlockDirty(ldf, seg->relHead);
@@ -1284,7 +1282,7 @@ void Library_Publish(VMHandle fh, /* File handle of passed blocks */
                         {
                             targetID =
                                 ST_DupNoEnter(ldf, targetID, symbols, strings);
-                            sprintf(message,
+                            sgprintf(message,
                                 "Unable to publish %i due to a reference to "
                                 "%i, which is not an exported routine",
                                 symID,
@@ -1319,7 +1317,7 @@ void Library_Publish(VMHandle fh, /* File handle of passed blocks */
 
                         if (val > bytes)
                         {
-                            sprintf(message,
+                            sgprintf(message,
                                 "Unable to publish %i due to a reference to "
                                 "data/code outside the routine.",
                                 symID);
@@ -1464,7 +1462,7 @@ void Library_SkipUntilNumber(int n)
 
     if (numEPs >= n)
     {
-        sprintf(message,
+        sgprintf(message,
             "'skip until %d' follows %d other entry points",
             n,
             numEPs);
@@ -1523,13 +1521,13 @@ void Library_SkipUntilConstant(char* name)
 
     if (id == NullID)
     {
-        sprintf(message, "%s undefined, so can't skip until then.", name);
+        sgprintf(message, "%s undefined, so can't skip until then.", name);
         yyerror(message);
         return;
     }
     else if (!Sym_FindWithSegment(symbols, id, &symBlock, &symOff, FALSE, &sd))
     {
-        sprintf(message,
+        sgprintf(message,
             "Can't find symbol for %s, so can't skip until then.",
             name);
         yyerror(message);
@@ -1547,7 +1545,7 @@ void Library_SkipUntilConstant(char* name)
         sym = (ObjSym*)((genptr)osh + symOff);
         if (sym->type != OSYM_CONST)
         {
-            sprintf(message,
+            sgprintf(message,
                 "%s must be defined as a constant to skip until then.",
                 name);
             yyerror(message);
@@ -1671,7 +1669,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
         /*
          * Try sticking .ldf onto the end.
          */
-        sprintf(file, "%s.ldf", name);
+        sgprintf(file, "%s.ldf", name);
         fh = Obj_Open(file, &status, &type, TRUE);
         if (fh == NULL)
         {
@@ -1680,7 +1678,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
                 /*
                  * Stick the name onto the end of this directory and try that
                  */
-                sprintf(file, "%s" QUOTED_SLASH "%s", dirs[i], name);
+                sgprintf(file, "%s" QUOTED_SLASH "%s", dirs[i], name);
                 fh = Obj_Open(file, &status, &type, TRUE);
                 if (fh != NULL)
                 {
@@ -1698,7 +1696,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
             }
             if (i == ndirs)
             {
-                sprintf(file, "cannot locate library %s", name);
+                sgprintf(file, "cannot locate library %s", name);
                 yyerror(file);
                 return LLV_FAILURE;
             }
@@ -1706,7 +1704,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
     }
     if (type != OBJ_VM)
     {
-        sprintf(file, "cannot handle non-VM library %s (yet)", name);
+        sgprintf(file, "cannot handle non-VM library %s (yet)", name);
         yyerror(file);
         fclose((FILE*)fh);
         return LLV_FAILURE;
@@ -1722,7 +1720,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
      * This check is no longer valid now that "publish" creates segments
 
     if (hdr->numSeg != 1) {
-        sprintf(file, "%s is an improperly formatted library definition file",
+        sgprintf(file, "%s is an improperly formatted library definition file",
                 name);
         yyerror(file);
         VMClose(fh);
@@ -1755,7 +1753,7 @@ LibraryLinkValues Library_Link(char* name, /* File name */
 
     if (strcmp(name, "geos") == 0 && hdr->proto.major <= 622)
     {
-        sprintf(file,
+        sgprintf(file,
             "kernel protocol is too low (%d.%d) -- we don't do 1.x links "
             "anymore\n",
             hdr->proto.major,
@@ -1783,8 +1781,8 @@ LibraryLinkValues Library_Link(char* name, /* File name */
      */
     oidfile = UtilGetIDFile();
     UtilSetIDFile(fh);
-    sprintf(libs[numLibs].entry.name,
-        "%-*.*i",
+    sgprintf(libs[numLibs].entry.name,
+        "%-*.*li",
         GEODE_NAME_SIZE,
         GEODE_NAME_SIZE,
         s->name);
@@ -1873,7 +1871,7 @@ void Library_LoadPublished(void)
             /*
              * Try sticking .ldf onto the end.
              */
-            sprintf(file, "%s.ldf", strippedName);
+            sgprintf(file, "%s.ldf", strippedName);
             fh = Obj_Open(file, &status, &type, TRUE);
             if (fh == NULL)
             {
@@ -1882,7 +1880,7 @@ void Library_LoadPublished(void)
                     /*
                      * Try sticking the name onto the end of the directory
                      */
-                    sprintf(
+                    sgprintf(
                         file, "%s" QUOTED_SLASH "%s", dirs[i], strippedName);
                     fh = Obj_Open(file, &status, &type, TRUE);
                     if (fh != NULL)
@@ -1974,14 +1972,14 @@ void Library_CheckForMissingLibraries(void)
     {
 
         /*
-                printf("\nThis geode is being linked to work with the following
+                gprintf("\nThis geode is being linked to work with the following
            platform:\n"); for (i = 0; i < numPlatformLibs; i++) { if
-           (platformLibs[i].flags & PE_EXEMPT) { printf("%s is exempted\n",
+           (platformLibs[i].flags & PE_EXEMPT) { gprintf("%s is exempted\n",
            platformLibs[i].name); } else if (platformLibs[i].flags & PE_SHIPPED)
-           { printf("%s is being shipped with proto %d.%d\n",
+           { gprintf("%s is being shipped with proto %d.%d\n",
            platformLibs[i].name, platformLibs[i].major, platformLibs[i].minor);
                     } else {
-                        printf("%s: %d.%d\n", platformLibs[i].name,
+                        gprintf("%s: %d.%d\n", platformLibs[i].name,
            platformLibs[i].major, platformLibs[i].minor);
                     }
                 }
@@ -1996,7 +1994,7 @@ void Library_CheckForMissingLibraries(void)
             if (LibraryLookupPlatformLibrary(libs[i].entry.name) ==
                 numPlatformLibs)
             {
-                sprintf(message,
+                sgprintf(message,
                     "Can't find required library %s in any of the platform "
                     "files",
                     libs[i].entry.name);
@@ -2203,7 +2201,7 @@ int Library_UseEntry(
                         {
                             char platformViolatedMessage[1000];
 
-                            sprintf(platformViolatedMessage,
+                            sgprintf(platformViolatedMessage,
                                 "Usage of %i requires %s minor protocol %d, "
                                 "but platform files only allow minor protocol "
                                 "%d\n",
@@ -2256,7 +2254,7 @@ void Library_ReadPlatformFile(char* name) /* File name */
     char libName[20]; /* Library name */
     int majorProto, minorProto;
 
-    sprintf(file, "%s.plt", name);
+    sgprintf(file, "%s.plt", name);
     fh = fopen(file, "r");
     if (fh == NULL)
     {
@@ -2268,7 +2266,7 @@ void Library_ReadPlatformFile(char* name) /* File name */
             /*
              * Stick the name onto the end of this directory and try that
              */
-            sprintf(file, "%s" QUOTED_SLASH "%s.plt", dirs[i], name);
+            sgprintf(file, "%s" QUOTED_SLASH "%s.plt", dirs[i], name);
             fh = fopen(file, "r");
             if (fh != NULL)
             {
@@ -2277,7 +2275,7 @@ void Library_ReadPlatformFile(char* name) /* File name */
         }
         if (i == ndirs)
         {
-            sprintf(file, "cannot locate platform file for %s", name);
+            sgprintf(file, "cannot locate platform file for %s", name);
             yyerror(file);
             return;
         }
@@ -2314,7 +2312,7 @@ void Library_ReadPlatformFile(char* name) /* File name */
              */
             if (majorProto != platformLibs[i].major)
             {
-                sprintf(file,
+                sgprintf(file,
                     "Major protocol numbers for %s must match across platform "
                     "files (found %d and %d)",
                     libName,
@@ -2382,7 +2380,7 @@ void Library_ReadShipFile(char* name) /* File name */
     char libName[20]; /* Library name */
     int majorProto, minorProto;
 
-    sprintf(file, "%s.plt", name);
+    sgprintf(file, "%s.plt", name);
     fh = fopen(file, "r");
     if (fh == NULL)
     {
@@ -2394,7 +2392,7 @@ void Library_ReadShipFile(char* name) /* File name */
             /*
              * Stick the name onto the end of this directory and try that
              */
-            sprintf(file, "%s" QUOTED_SLASH "%s.plt", dirs[i], name);
+            sgprintf(file, "%s" QUOTED_SLASH "%s.plt", dirs[i], name);
             fh = fopen(file, "r");
             if (fh != NULL)
             {
@@ -2403,7 +2401,7 @@ void Library_ReadShipFile(char* name) /* File name */
         }
         if (i == ndirs)
         {
-            sprintf(file, "cannot locate ship file for %s", name);
+            sgprintf(file, "cannot locate ship file for %s", name);
             yyerror(file);
             return;
         }
@@ -2444,7 +2442,7 @@ void Library_ReadShipFile(char* name) /* File name */
                 if ((majorProto != platformLibs[i].major) ||
                     (minorProto != platformLibs[i].minor))
                 {
-                    sprintf(file,
+                    sgprintf(file,
                         "Library %s cannot be shipped with multiple protocols "
                         "(%d.%d and %d.%d)",
                         libName,

@@ -22,11 +22,8 @@
  *	Pass2 functions for microsoft object files.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: pass2ms.c,v 1.40 96/07/08 17:30:13 tbradley Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "glue.h"
 #include "msobj.h"
 #include "obj.h"
@@ -34,8 +31,7 @@ static char* rcsid = "$Id: pass2ms.c,v 1.40 96/07/08 17:30:13 tbradley Exp $";
 #include "sym.h"
 #include "geo.h"
 #include "cv.h"
-
-#include <objfmt.h>
+#include "objfmt.h"
 
 Vector segSizes = NULL;
 
@@ -426,13 +422,12 @@ static void Pass2MSFixupLMem(const char* file, /* File being linked */
         for (cur = heap->addrH; cur != 0; cur = next)
         { /* block look */
             ObjSymHeader* osh;
-            ObjSym *os, *first;
+            ObjSym* os;
             word n;
 
             osh = (ObjSymHeader*)VMLock(symbols, cur, (MemHandle*)NULL);
 
             os = ObjFirstEntry(osh, ObjSym);
-            first = os;
             if (!Obj_IsAddrSym(os))
             {
                 /*
@@ -460,7 +455,7 @@ static void Pass2MSFixupLMem(const char* file, /* File being linked */
                             ((os->u.addrSym.address <
                                  (swaps(*nextOldHandle) - LMEM_SIZE_SIZE) +
                                      heap->grpOff) ||
-                                (*nextOldHandle == NULL))))
+                                (*nextOldHandle == 0))))
                     {
                         int newLastOffset = -1;
 
@@ -741,7 +736,7 @@ static void Pass2MSFixupLMem(const char* file, /* File being linked */
  *	ardeb	3/12/91		Initial Revision
  *
  ***********************************************************************/
-void Pass2MS_Finish(const char* file, int happy, int pass)
+void Pass2MS_Finish(const char* file, Boolean happy, int pass)
 {
     int i;
     SegDesc* sd;
@@ -903,7 +898,7 @@ static void Pass2MSProcessRels(const char* file, /* Object file being read */
     }
 #if TEST_NRELS
     /*XXX*/
-    printf("P2 %i:%04x (%s)\n", sd->name, baseOff, file);
+    gprintf("P2 %i:%04x (%s)\n", sd->name, baseOff, file);
 #endif
     if ((sd != NULL) && (sd->combine == SEG_LMEM) &&
         (sd->group->segs[0] == sd) && (fileOps->rtrelsize != 0) &&

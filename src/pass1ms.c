@@ -23,11 +23,7 @@
  *
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: pass1ms.c,v 1.30 96/07/08 17:29:46 tbradley Exp $";
-#endif lint
 
-#include <config.h>
 #include "glue.h"
 #include "msobj.h"
 #include "geo.h"
@@ -36,8 +32,8 @@ static char* rcsid = "$Id: pass1ms.c,v 1.30 96/07/08 17:29:46 tbradley Exp $";
 #include "sym.h"
 #include "library.h"
 #include "cv.h"
+#include "objfmt.h"
 
-#include <objfmt.h>
 typedef int (*CmpCallback)(const void*, const void*);
 
 #define MS_SYMS_NOT_ENTERED                          \
@@ -492,7 +488,7 @@ static int Pass1MSCompareSyms(ObjSym* os1, ObjSym* os2)
  *	ardeb	3/12/91		Initial Revision
  *
  ***********************************************************************/
-void Pass1MS_Finish(const char* file, int happy, int pass)
+void Pass1MS_Finish(const char* file, Boolean happy, int pass)
 {
     int i;
 
@@ -925,15 +921,8 @@ static void Pass1MSReplaceFileName(ID oldName, /* First record to add */
         if (next != 0)
         {
 
-            word curSize;   /* Size of current line block */
-            word newSize;   /* Size it should be */
-            MemHandle mem;  /* Memory handle for resizing it */
-            word spaceLeft; /* Number of bytes left in it that we
-                             * may fill */
-            int numLeft;    /* Number of line entries we have left
-                             * to fill from our buffer */
-            int prevStart = -1;
-            int prevLine = -1;
+            word curSize;  /* Size of current line block */
+            MemHandle mem; /* Memory handle for resizing it */
             int nlines;
             Boolean first = TRUE;
 
@@ -1148,7 +1137,7 @@ unsigned Pass1MS_CountRels(const char* file, /* Object file being read */
 
 #if TEST_NRELS
     /*XXX*/
-    printf("P1 %i:%04x (%s)\n", sd->name, startOff, file);
+    gprintf("P1 %i:%04x (%s)\n", sd->name, startOff, file);
 #endif
 
     endRecord = bp + fixlen;
@@ -1195,7 +1184,7 @@ unsigned Pass1MS_CountRels(const char* file, /* Object file being read */
             {
                 if (MSObj_IsFloatingPointExtDef(target.external) != FPED_FALSE)
                 {
-                    printf("borlandc\r\n");
+                    gprintf("borlandc\r\n");
                     // Library_Link("borlandc", LLT_ON_STARTUP, GA_LIBRARY);
                 }
             }
@@ -1346,7 +1335,7 @@ unsigned Pass1MS_CountRels(const char* file, /* Object file being read */
             }
 #if TEST_NRELS
             /*XXX*/
-            printf("%04x %d 0\n", fixLoc & FL_OFFSET, nrel);
+            gprintf("%04x %d 0\n", fixLoc & FL_OFFSET, nrel);
 #endif
             total += nrel;
         }
@@ -1561,7 +1550,7 @@ void Pass1MS_EnterExternal(ID name) /* Name of external to enter */
                  */
                 pubName = NullID;
             }
-            VMUnlock(sym, symBlock);
+            VMUnlock(symbols, symBlock);
 
             /*
              * Found in a library segment, so mark the name
@@ -1766,10 +1755,10 @@ void Pass1MS_ProcessObject(const char* file, FILE* f)
             case MO_PUBDEF:
             {
                 SegDesc* sd;
-                GroupDesc* gd;
+                // GroupDesc* gd;
                 byte symType;
                 VMBlockHandle symBlock;
-                VMBlockHandle typeBlock;
+                // VMBlockHandle typeBlock;
                 int i;
                 byte* tbp;
                 byte* endRecord;
@@ -1786,7 +1775,7 @@ void Pass1MS_ProcessObject(const char* file, FILE* f)
                 /*
                  * Fetch out the group and segment definitions.
                  */
-                gd = MSObj_GetGroup(&bp);
+                // gd = MSObj_GetGroup(&bp);
                 sd = MSObj_GetSegment(&bp);
 
                 /*
@@ -1812,7 +1801,7 @@ void Pass1MS_ProcessObject(const char* file, FILE* f)
                     }
                     else
                     {
-                        template.type = symType = OSYM_LABEL;
+                        template.type = /* symType = */ OSYM_LABEL;
                         template.u.label.near = FALSE;
 
                         /* Look for an absolute segment of the same frame,
@@ -1886,7 +1875,7 @@ void Pass1MS_ProcessObject(const char* file, FILE* f)
                     /*
                      * Always use this type block.
                      */
-                    typeBlock = osh->types;
+                    // typeBlock = osh->types;
 
                     /*
                      * Figure how big the block'd be with these new symbols.
@@ -2039,14 +2028,14 @@ void Pass1MS_ProcessObject(const char* file, FILE* f)
             case MO_LINNUM:
             {
                 SegDesc* sd;
-                GroupDesc* gd;
+                // GroupDesc* gd;
 
                 /*
                  * Fetch the group and segment for which these line numbers are.
                  * We ignore the group, of course, but the segment's nice to
                  * have...
                  */
-                gd = MSObj_GetGroup(&bp);
+                // gd = MSObj_GetGroup(&bp);
                 sd = MSObj_GetSegment(&bp);
 
                 if (sd == (SegDesc*)NULL)

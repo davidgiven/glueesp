@@ -40,15 +40,11 @@
  *	block/offset address.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: sym.c,v 3.22 95/11/08 18:13:52 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "obj.h"
 #include "sym.h"
 #include "objfmt.h"
-#include <stddef.h>
 
 extern Boolean oldSymfileFormat;
 
@@ -442,7 +438,7 @@ static void SymCompareSyms(VMHandle file, /* Output file */
     {
         swapSym = sym1;
         sym1 = sym2;
-        sym2 = sym1;
+        sym2 = swapSym;
     }
 
     if ((sym1->type != sym2->type) &&
@@ -474,11 +470,11 @@ static void SymCompareSyms(VMHandle file, /* Output file */
                     Notify(NOTIFY_ERROR,
                         "%i: type differs between object files",
                         sym1->name);
-                    fprintf(stderr, "\t");
+                    fgprintf(stderr, "\t");
                     Obj_PrintType(stderr, tfile1, base1, sym1->u.variable.type);
-                    fprintf(stderr, "\nversus\n\t");
+                    fgprintf(stderr, "\nversus\n\t");
                     Obj_PrintType(stderr, tfile2, base2, sym2->u.variable.type);
-                    fprintf(stderr, "\n");
+                    fgprintf(stderr, "\n");
                 }
 
                 VMUnlock(tfile1, types);

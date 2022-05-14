@@ -22,11 +22,8 @@
  * DESCRIPTION:
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmGVers.c,v 1.1 92/06/02 21:18:25 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 
 /***********************************************************************

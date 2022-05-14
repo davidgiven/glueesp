@@ -28,8 +28,8 @@
  *			  VECTOR DEFINITIONS
  *
  ******************************************************************************/
+
 typedef void* Vector; /* Basic type */
-typedef void* Address;
 
 #define NullVector ((Vector)NULL)
 

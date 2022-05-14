@@ -22,9 +22,6 @@
  * 	tracing stuff that's there.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vector.c,v 1.4 92/10/27 20:52:10 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "vector.h"
@@ -255,7 +252,7 @@ void Vector_Add(Vector vector, /* Vector to change */
         v->data = (Address)realloc(v->data, v->max * v->size);
         if (v->data == (Address)NULL)
         {
-            printf("Out of memory in Vector_Add\n");
+            gprintf("Out of memory in Vector_Add\n");
             exit(1);
         }
         bzero(v->data + (oldMax * v->size), (v->max - oldMax) * v->size);
@@ -351,7 +348,7 @@ void Vector_Insert(Vector vector, int offset, Address data)
  *
  *-----------------------------------------------------------------------
  */
-int Vector_Get(Vector vector, int offset, Address buf)
+Boolean Vector_Get(Vector vector, int offset, Address buf)
 {
     register VectorPtr v = (VectorPtr)vector;
 

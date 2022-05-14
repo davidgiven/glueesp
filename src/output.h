@@ -171,7 +171,7 @@ extern int Out_Fetch(long position, void* data, int len);
 extern void Out_Final(char* outfile);
 extern void Out_DosMap(char* mapfile, long imgBase);
 extern void Out_ExtraReloc(SegDesc* sd, word reloc);
-extern void Out_AddLines(char* file,
+extern void Out_AddLines(const char* file,
     VMHandle fh,
     SegDesc* sd,
     VMBlockHandle lineMap,

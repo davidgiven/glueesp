@@ -46,15 +46,12 @@
  *	all the address-bearing symbols come first.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: pass1vm.c,v 3.21 93/09/19 18:09:49 adam Exp $";
-#endif lint
 
 #include "glue.h"
 #include "obj.h"
 #include "sym.h"
-#include <lmem.h>
-#include <objfmt.h>
+#include "lmem.h"
+#include "objfmt.h"
 #include "output.h"
 
 /***********************************************************************
@@ -74,11 +71,11 @@ static char* rcsid = "$Id: pass1vm.c,v 3.21 93/09/19 18:09:49 adam Exp $";
  *
  ***********************************************************************/
 static int Pass1VMRelLines(
-    char* file,    /* Name of object file, in case of error */
-    VMHandle fh,   /* Handle of same */
-    ObjSegment* s, /* Segment whose lines are being copied */
-    SegDesc* sd,   /* Internal version of same in output */
-    word reloc)    /* Amount by which to relocate lines */
+    const char* file, /* Name of object file, in case of error */
+    VMHandle fh,      /* Handle of same */
+    ObjSegment* s,    /* Segment whose lines are being copied */
+    SegDesc* sd,      /* Internal version of same in output */
+    word reloc)       /* Amount by which to relocate lines */
 {
     /*
      * If the segment has no line numbers, forget about it.
@@ -210,7 +207,7 @@ static int Pass1VMRelAddrSyms(const char* file, /* File name */
     prev = sd->addrT;
     next = s->syms;
 
-    typeDup = lastType = (VMBlockHandle)NULL;
+    typeDup = lastType = (VMBlockHandle)0;
 
     while (next != 0)
     {
@@ -401,7 +398,7 @@ static int Pass1VMRelAddrSyms(const char* file, /* File name */
          * as dirty.
          */
         next = osh->next;
-        osh->next = (VMBlockHandle)NULL;
+        osh->next = (VMBlockHandle)0;
         VMUnlockDirty(symbols, dup);
     }
 

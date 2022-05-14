@@ -659,7 +659,7 @@ typedef struct _MSSaveFixupRec
     dword startOff;
     dword endOff;
     MSThread threads[MS_MAX_THREADS];
-    byte data[LABEL_IN_STRUCT];
+    byte data[];
 } MSSaveFixupRec;
 
 extern MSSaveRecLinks pubHead; /* predefined list for saving PUBDEF
@@ -680,7 +680,7 @@ extern void MSObj_FreeFixups(MSSaveRecLinks* head);
  */
 typedef int MSObjCheck(
     const char* file, byte rectype, word reclen, byte* data, int pass);
-typedef void MSObjFinish(const char* file, int happy, int pass);
+typedef void MSObjFinish(const char* file, Boolean happy, int pass);
 
 extern MSObjCheck* msobjCheck;
 extern MSObjFinish* msobjFinish;
@@ -734,9 +734,8 @@ typedef struct
     word heapSize;         /* Original heap size */
     MSSaveRecLinks fixups; /* Chain of fixup records, in address
                             * order */
-    word handleData[LABEL_IN_STRUCT];
-    /* Block holding the handle table, as
-     * read in from the object file */
+    word handleData[];     /* Block holding the handle table, as
+                            * read in from the object file */
 } MSObjLMemData;
 
 #define LMEM_SIZE_SIZE                          \

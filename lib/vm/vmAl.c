@@ -17,11 +17,8 @@
  *	Allocate a new VM block
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: vmAl.c,v 1.2 96/05/20 18:58:01 dbaumann Exp $";
-#endif lint
 
-#include <config.h>
+#include "config.h"
 #include "vmInt.h"
 #include "malloc.h"
 
