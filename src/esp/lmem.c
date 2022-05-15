@@ -54,21 +54,20 @@
  *
  ***********************************************************************/
 #ifndef lint
-static char *rcsid =
-"$Id: lmem.c,v 3.10 93/02/12 18:47:58 adam Exp $";
+static char* rcsid = "$Id: lmem.c,v 3.10 93/02/12 18:47:58 adam Exp $";
 #endif lint
 
-#include    "esp.h"
-#include    <objfmt.h>
-#include    <stddef.h>
-#include    <lmem.h>
+#include "esp.h"
+#include <objfmt.h>
+#include <stddef.h>
+#include <lmem.h>
 
-#define DEFAULT_ALIGN  0xf  	/* Default to para alignment for compatibility
-				 * with 1.X */
+#define DEFAULT_ALIGN                                  \
+    0xf /* Default to para alignment for compatibility \
+         * with 1.X */
 
-int	lmem_Alignment = DEFAULT_ALIGN;
+int lmem_Alignment = DEFAULT_ALIGN;
 
-
 /***********************************************************************
  *				LMemStoreOffset
  ***********************************************************************
@@ -86,16 +85,11 @@ int	lmem_Alignment = DEFAULT_ALIGN;
  *	ardeb	8/14/89		Initial Revision
  *
  ***********************************************************************/
-FixResult
-LMemStoreOffset(int 	*dotPtr,
-		int 	prevSize,
-		int 	pass,
-		Expr	*expr1,
-		Expr	*expr2,
-		Opaque	data)
+FixResult LMemStoreOffset(
+    int* dotPtr, int prevSize, int pass, Expr* expr1, Expr* expr2, Opaque data)
 {
-    byte    	b[2];
-    dword    	size = Table_Size(curSeg->u.segment.code);
+    byte b[2];
+    dword size = Table_Size(curSeg->u.segment.code);
 
     /*
      * Convert size to buffer in proper byte order, padding to the
@@ -108,16 +102,16 @@ LMemStoreOffset(int 	*dotPtr,
     /*
      * Store the bytes in the current segment at the given offset.
      */
-    Table_Store(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+    Table_Store(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
 
     /*
      * Advance so fixup module knows we used all the space.
      */
     *dotPtr += 2;
 
-    return(FR_DONE);
+    return (FR_DONE);
 }
-
+
 /***********************************************************************
  *				LMemStoreSize
  ***********************************************************************
@@ -136,42 +130,40 @@ LMemStoreOffset(int 	*dotPtr,
  *	ardeb	8/14/89		Initial Revision
  *
  ***********************************************************************/
-FixResult
-LMemStoreSize(int 	*dotPtr,
-	      int 	prevSize,
-	      int 	pass,
-	      Expr	*expr1,
-	      Expr	*expr2,
-	      Opaque	data)	    /* Paired segment */
+FixResult LMemStoreSize(int* dotPtr,
+    int prevSize,
+    int pass,
+    Expr* expr1,
+    Expr* expr2,
+    Opaque data) /* Paired segment */
 {
-    byte    	b[2];
-    dword    	size = Table_Size(curSeg->u.segment.code);
-    SymbolPtr	pair = (SymbolPtr)data;
+    byte b[2];
+    dword size = Table_Size(curSeg->u.segment.code);
+    SymbolPtr pair = (SymbolPtr)data;
 
     /*
      * Convert size to buffer in proper byte order, padding both to a dword
      * boundary, as that's the alignment for the handle table.
      */
     size = ((size + lmem_Alignment) & ~lmem_Alignment) +
-	Table_Size(pair->u.segment.code);
-    
+           Table_Size(pair->u.segment.code);
+
     b[0] = size;
     b[1] = size >> 8;
 
     /*
      * Store the bytes in the current segment at the given offset.
      */
-    Table_Store(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+    Table_Store(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
 
     /*
      * Advance so fixup module knows we used all the space.
      */
     *dotPtr += 2;
 
-    return(FR_DONE);
+    return (FR_DONE);
 }
 
-
 /***********************************************************************
  *				LMemAddFreeSpace
  ***********************************************************************
@@ -192,23 +184,21 @@ LMemStoreSize(int 	*dotPtr,
  *	ardeb	3/19/90		Initial Revision
  *
  ***********************************************************************/
-FixResult
-LMemAddFreeSpace(int 	*dotPtr,
-		 int 	prevSize,
-		 int 	pass,
-		 Expr	*expr1,
-		 Expr	*expr2,
-		 Opaque	data)	    /* Amount of free space desired */
+FixResult LMemAddFreeSpace(int* dotPtr,
+    int prevSize,
+    int pass,
+    Expr* expr1,
+    Expr* expr2,
+    Opaque data) /* Amount of free space desired */
 {
-    byte    	b[2];
-    word    	freeSpace = (word)data;
-    byte    	*freeBlock;
-    SymbolPtr	pair = curSeg->u.segment.data->pair;
-    dword   	freeOffset;
-    int	    	i;
+    byte b[2];
+    word freeSpace = (word)data;
+    byte* freeBlock;
+    SymbolPtr pair = curSeg->u.segment.data->pair;
+    dword freeOffset;
+    int i;
 
-
-    freeBlock = (byte *)malloc(freeSpace);
+    freeBlock = (byte*)malloc(freeSpace);
     /*
      * Initialize the free block. The first word contains the block's size;
      * the second contains the next free block pointer (0); all the rest contain
@@ -217,22 +207,24 @@ LMemAddFreeSpace(int 	*dotPtr,
     freeBlock[0] = freeSpace;
     freeBlock[1] = freeSpace >> 8;
     freeBlock[2] = freeBlock[3] = 0; /* No next free block */
-    for (i = 4; i < freeSpace; i++) {
-	freeBlock[i] = 0xcc;
+    for (i = 4; i < freeSpace; i++)
+    {
+        freeBlock[i] = 0xcc;
     }
 
     /*
      * Add the free block to the end of the heap segment.
      */
     freeOffset = Table_Size(pair->u.segment.code);
-    Table_Store(pair->u.segment.code, freeSpace, (void *)freeBlock, freeOffset);
+    Table_Store(pair->u.segment.code, freeSpace, (void*)freeBlock, freeOffset);
 
-    freeOffset += (Table_Size(curSeg->u.segment.code)+lmem_Alignment) & ~lmem_Alignment;
+    freeOffset +=
+        (Table_Size(curSeg->u.segment.code) + lmem_Alignment) & ~lmem_Alignment;
 
     b[0] = freeOffset;
     b[1] = freeOffset >> 8;
-    
-    Table_Store(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+
+    Table_Store(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
 
     /*
      * Adjust the LMBH_blockSize field as well.
@@ -242,18 +234,20 @@ LMemAddFreeSpace(int 	*dotPtr,
     b[0] = freeOffset;
     b[1] = freeOffset >> 8;
 
-    Table_Store(curSeg->u.segment.code, 2, (void *)b,
-		offsetof(LMemBlockHeader,LMBH_blockSize));
+    Table_Store(curSeg->u.segment.code,
+        2,
+        (void*)b,
+        offsetof(LMemBlockHeader, LMBH_blockSize));
 
     /*
      * Advance so fixup module knows we used all the space.
      */
     *dotPtr += 2;
 
-    free((void *)freeBlock);
-    return(FR_DONE);
+    free((void*)freeBlock);
+    return (FR_DONE);
 }
-
+
 /***********************************************************************
  *				LMemRoundNumHandles
  ***********************************************************************
@@ -273,18 +267,13 @@ LMemAddFreeSpace(int 	*dotPtr,
  *	ardeb	5/ 8/91		Initial Revision
  *
  ***********************************************************************/
-static FixResult
-LMemRoundNumHandles(int 	*dotPtr,
-		    int 	prevSize,
-		    int 	pass,
-		    Expr	*expr1,
-		    Expr	*expr2,
-		    Opaque	data)
+static FixResult LMemRoundNumHandles(
+    int* dotPtr, int prevSize, int pass, Expr* expr1, Expr* expr2, Opaque data)
 {
-    byte    	b[2];
-    word    	nHandles;
+    byte b[2];
+    word nHandles;
 
-    Table_Fetch(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+    Table_Fetch(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
     nHandles = b[0] | (b[1] << 8);
 
     nHandles = (nHandles + 1) & ~1;
@@ -292,7 +281,7 @@ LMemRoundNumHandles(int 	*dotPtr,
     b[0] = nHandles;
     b[1] = nHandles >> 8;
 
-    Table_Store(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+    Table_Store(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
 
     /*
      * The extra handle, if such there be, was initialized to 0 by
@@ -304,10 +293,9 @@ LMemRoundNumHandles(int 	*dotPtr,
      */
     *dotPtr += prevSize;
 
-    return(FR_DONE);
+    return (FR_DONE);
 }
-		
-
+
 /***********************************************************************
  *				LMem_CreateSegment
  ***********************************************************************
@@ -315,7 +303,7 @@ LMemRoundNumHandles(int 	*dotPtr,
  * CALLED BY:	    yyparse
  * RETURN:	    Nothing
  * SIDE EFFECTS:    One SYM_GROUP and two SYM_SEGMENT symbols are created.
- *	    	
+ *
  * STRATEGY:
  *
  * REVISION HISTORY:
@@ -324,20 +312,19 @@ LMemRoundNumHandles(int 	*dotPtr,
  *	ardeb	8/14/89		Initial Revision
  *
  ***********************************************************************/
-SymbolPtr
-LMem_CreateSegment(ID 	name)
+SymbolPtr LMem_CreateSegment(ID name)
 {
-    char    	    *nameStr;	/* Locked version of "name" */
-    char    	    *segName;	/* New name for internal segments */
-    ID	    	    segID;  	/* ID for internal segments */
-    ID 	    	    class;  	/* ID of class for internal segments */
-    SymbolPtr	    dataSeg,	/* Data/header segment */
-		    heapSeg;	/* Heap (handle table, et al) segment */
+    char* nameStr;     /* Locked version of "name" */
+    char* segName;     /* New name for internal segments */
+    ID segID;          /* ID for internal segments */
+    ID class;          /* ID of class for internal segments */
+    SymbolPtr dataSeg, /* Data/header segment */
+        heapSeg;       /* Heap (handle table, et al) segment */
 
     nameStr = ST_Lock(output, name);
 
     /* 5 = strlen("@Heap" || "@Data") + 1 */
-    segName = (char *)malloc(strlen(nameStr) + 6);
+    segName = (char*)malloc(strlen(nameStr) + 6);
     class = ST_EnterNoLen(output, permStrings, "LMEM");
 
     /*
@@ -376,10 +363,8 @@ LMem_CreateSegment(ID 	name)
      * Finally, create the group that encompasses them both.
      */
     return (Sym_Enter(name, SYM_GROUP, 2, dataSeg, heapSeg));
-
 }
 
-
 /***********************************************************************
  *				LMem_InitSegment
  ***********************************************************************
@@ -391,7 +376,7 @@ LMem_CreateSegment(ID 	name)
  *	    	    block header stored at its beginning, with
  *	    	    appropriate internal and external fixups
  *	    	    registered to fixup the header.
- *	    	
+ *
  * STRATEGY:
  *
  * REVISION HISTORY:
@@ -400,16 +385,12 @@ LMem_CreateSegment(ID 	name)
  *	ardeb	8/14/89		Initial Revision
  *
  ***********************************************************************/
-void
-LMem_InitSegment(SymbolPtr	group,
-		 word		segType,
-		 word		flags,
-		 word	    	freeSpace)
+void LMem_InitSegment(SymbolPtr group, word segType, word flags, word freeSpace)
 {
-    LMemBlockHeader lmbh;   	/* Header to store at front of dataSeg */
-    byte    	    *bp;    	/* Pointer for initializing header in proper
-				 * byte-order */
-    ExprResult	    res;    	/* Result for external handle fixup */
+    LMemBlockHeader lmbh; /* Header to store at front of dataSeg */
+    byte* bp;             /* Pointer for initializing header in proper
+                           * byte-order */
+    ExprResult res;       /* Result for external handle fixup */
 
     /*
      * Change to the data segment of the lmem group.
@@ -419,17 +400,20 @@ LMem_InitSegment(SymbolPtr	group,
     /*
      * If already initialized, just return.
      */
-    if (curSeg->u.segment.data->inited) {
-	return;
+    if (curSeg->u.segment.data->inited)
+    {
+        return;
     }
 
     /*
      * Make sure nothing got in here before us.
      */
-    if (Table_Size(curSeg->u.segment.code) != 0) {
-	yyerror("cannot initialize lmem segment %i -- data stored before header",
-		group->name);
-	return;
+    if (Table_Size(curSeg->u.segment.code) != 0)
+    {
+        yyerror(
+            "cannot initialize lmem segment %i -- data stored before header",
+            group->name);
+        return;
     }
     curSeg->u.segment.data->inited = TRUE;
 
@@ -438,14 +422,14 @@ LMem_InitSegment(SymbolPtr	group,
      * segment type we were given.
      */
     bzero(&lmbh, sizeof(lmbh));
-    bp = (byte *)&lmbh.LMBH_flags;
+    bp = (byte*)&lmbh.LMBH_flags;
     *bp++ = flags;
     *bp++ = flags >> 8;
     *bp++ = segType;
     *bp++ = segType >> 8;
 
     freeSpace = (freeSpace + 3) & ~3;
-    bp = (byte *)&lmbh.LMBH_totalFree;
+    bp = (byte*)&lmbh.LMBH_totalFree;
     *bp++ = freeSpace;
     *bp = freeSpace >> 8;
 
@@ -453,55 +437,60 @@ LMem_InitSegment(SymbolPtr	group,
      * Store the header in the segment, advancing dot so the next data
      * stored go after the header.
      */
-    Table_Store(curSeg->u.segment.code, sizeof(lmbh), (void *)&lmbh, 0);
+    Table_Store(curSeg->u.segment.code, sizeof(lmbh), (void*)&lmbh, 0);
     dot += sizeof(lmbh);
 
     /*
      * Register fixup for the LMBH_offset field for the final pass so
      * we get the proper value in the header.
      */
-    Fix_Register(FC_FINAL, LMemStoreOffset,
-		 offsetof(LMemBlockHeader, LMBH_offset),
-		 2,
-		 NULL,
-		 NULL,
-		 (Opaque)NULL);
+    Fix_Register(FC_FINAL,
+        LMemStoreOffset,
+        offsetof(LMemBlockHeader, LMBH_offset),
+        2,
+        NULL,
+        NULL,
+        (Opaque)NULL);
 
     /*
      * Register fixup for LMBH_nHandles so we can round it up properly.
      */
-    Fix_Register(FC_FINAL, LMemRoundNumHandles,
-		 offsetof(LMemBlockHeader, LMBH_nHandles),
-		 2,
-		 NULL,
-		 NULL,
-		 (Opaque)NULL);
+    Fix_Register(FC_FINAL,
+        LMemRoundNumHandles,
+        offsetof(LMemBlockHeader, LMBH_nHandles),
+        2,
+        NULL,
+        NULL,
+        (Opaque)NULL);
     /*
      * If any free space requested, register a FINAL fixup to add the free
      * block at the end of the segment.
      */
-    if (freeSpace != 0) {
-	Fix_Register(FC_FINAL, LMemAddFreeSpace,
-		     offsetof(LMemBlockHeader, LMBH_freeList),
-		     2,
-		     NULL,
-		     NULL,
-		     (Opaque)freeSpace);
-    } else {
-	/*
-	 * Register fixup for the LMBH_blockSize field for the final pass so
-	 * we get the proper value in the header. This is only registered if
-	 * no extra free space was declared, as LMemAddFreeSpace has to set
-	 * LMBH_blockSize anyway to account for the extra free block.
-	 */
-	Fix_Register(FC_FINAL, LMemStoreSize,
-		     offsetof(LMemBlockHeader, LMBH_blockSize),
-		     2,
-		     NULL,
-		     NULL,
-		     (Opaque)curSeg->u.segment.data->pair);
-	
-	
+    if (freeSpace != 0)
+    {
+        Fix_Register(FC_FINAL,
+            LMemAddFreeSpace,
+            offsetof(LMemBlockHeader, LMBH_freeList),
+            2,
+            NULL,
+            NULL,
+            (Opaque)freeSpace);
+    }
+    else
+    {
+        /*
+         * Register fixup for the LMBH_blockSize field for the final pass so
+         * we get the proper value in the header. This is only registered if
+         * no extra free space was declared, as LMemAddFreeSpace has to set
+         * LMBH_blockSize anyway to account for the extra free block.
+         */
+        Fix_Register(FC_FINAL,
+            LMemStoreSize,
+            offsetof(LMemBlockHeader, LMBH_blockSize),
+            2,
+            NULL,
+            NULL,
+            (Opaque)curSeg->u.segment.data->pair);
     }
     /*
      * Enter a FIX_HANDLE external fixup for the LMBH_handle field of
@@ -513,11 +502,10 @@ LMem_InitSegment(SymbolPtr	group,
     res.rel.pcrel = 0;
     res.rel.fixed = 0;
     Fix_Enter(&res,
-	      offsetof(LMemBlockHeader, LMBH_handle),
-	      offsetof(LMemBlockHeader, LMBH_handle));
+        offsetof(LMemBlockHeader, LMBH_handle),
+        offsetof(LMemBlockHeader, LMBH_handle));
 }
 
-
 /***********************************************************************
  *				LMemFixHandle
  ***********************************************************************
@@ -539,25 +527,25 @@ LMem_InitSegment(SymbolPtr	group,
  *	ardeb	8/15/89		Initial Revision
  *
  ***********************************************************************/
-FixResult
-LMemFixHandle(int 	*dotPtr,
-	      int 	prevSize,
-	      int 	pass,
-	      Expr	*expr1,
-	      Expr	*expr2,
-	      Opaque	data)	    /* Chunk symbol to fix */
+FixResult LMemFixHandle(int* dotPtr,
+    int prevSize,
+    int pass,
+    Expr* expr1,
+    Expr* expr2,
+    Opaque data) /* Chunk symbol to fix */
 {
-    byte    	b[2];
-    SymbolPtr	sym = (SymbolPtr)data;
-    word    	offset;
-    SymbolPtr	pair;
+    byte b[2];
+    SymbolPtr sym = (SymbolPtr)data;
+    word offset;
+    SymbolPtr pair;
 
     /*
      * First figure the size of the data portion so we can determine the
      * offset of the handle table in the group.
      */
     pair = sym->segment->u.segment.data->pair;
-    offset = (Table_Size(pair->u.segment.code)+lmem_Alignment)&~lmem_Alignment;
+    offset =
+        (Table_Size(pair->u.segment.code) + lmem_Alignment) & ~lmem_Alignment;
     /*
      * Now add in the offset of the chunk data w/in the heap segment.
      */
@@ -569,17 +557,16 @@ LMemFixHandle(int 	*dotPtr,
     /*
      * Store the bytes in the current segment at the given offset.
      */
-    Table_Store(curSeg->u.segment.code, 2, (void *)b, *dotPtr);
+    Table_Store(curSeg->u.segment.code, 2, (void*)b, *dotPtr);
 
     /*
      * Advance so fixup module knows we used all the space.
      */
     *dotPtr += 2;
 
-    return(FR_DONE);
-}    
+    return (FR_DONE);
+}
 
-
 /***********************************************************************
  *				LMem_DefineChunk
  ***********************************************************************
@@ -598,37 +585,41 @@ LMemFixHandle(int 	*dotPtr,
  *	ardeb	8/14/89		Initial Revision
  *
  ***********************************************************************/
-SymbolPtr
-LMem_DefineChunk(TypePtr    type,   /* Type of data in the chunk */
-		 ID 	    name)   /* Name for new symbol */
+SymbolPtr LMem_DefineChunk(TypePtr type, /* Type of data in the chunk */
+    ID name)                             /* Name for new symbol */
 {
-    byte    	b[2];	    /* Buffer for adjusting LMBH_nHandles */
-    word    	nHandles;   /* Number of handles in table */
-    SymbolPtr	sym;	    /* New chunk symbol */
-    word    	flags;	    /* Flags so we know whether to create a handle
-			     * for the thing... */
+    byte b[2];     /* Buffer for adjusting LMBH_nHandles */
+    word nHandles; /* Number of handles in table */
+    SymbolPtr sym; /* New chunk symbol */
+    word flags;    /* Flags so we know whether to create a handle
+                    * for the thing... */
 
     /*
      * Make sure used has specified parameters for the segment and the
      * data segment has been initialized.
      */
-    if (!curSeg->u.segment.data->inited) {
-	yyerror("cannot open chunk -- lmem segment not initialized");
-	return NullSymbol;
+    if (!curSeg->u.segment.data->inited)
+    {
+        yyerror("cannot open chunk -- lmem segment not initialized");
+        return NullSymbol;
     }
 
     /*
      * Locate the nHandles field of the header and extract its value
      */
-    Table_Fetch(curSeg->u.segment.code, 2, (void *)b,
-		offsetof(LMemBlockHeader,LMBH_nHandles));
+    Table_Fetch(curSeg->u.segment.code,
+        2,
+        (void*)b,
+        offsetof(LMemBlockHeader, LMBH_nHandles));
     nHandles = b[0] | (b[1] << 8);
 
     /*
      * Locate the flags word of the header and extract its value.
      */
-    Table_Fetch(curSeg->u.segment.code, 2, (void *)b,
-		offsetof(LMemBlockHeader,LMBH_flags));
+    Table_Fetch(curSeg->u.segment.code,
+        2,
+        (void*)b,
+        offsetof(LMemBlockHeader, LMBH_flags));
     flags = b[0] | (b[1] << 8);
 
     /*
@@ -636,7 +627,7 @@ LMem_DefineChunk(TypePtr    type,   /* Type of data in the chunk */
      * the chunk and the definition of the symbol itself.
      */
     PushSegment(curSeg->u.segment.data->pair);
-    
+
     /*
      * Make room for the new handle in the table, adjusting following fixups
      * and symbols.
@@ -644,11 +635,12 @@ LMem_DefineChunk(TypePtr    type,   /* Type of data in the chunk */
      * nHandles only goes up by one, however. Eventually nHandles is rounded
      * up...
      */
-    if (!(flags & LMF_NO_HANDLES) && (nHandles & 1) == 0) {
-	Table_Insert(curSeg->u.segment.code, nHandles * 2, 4);
-	Table_StoreZeroes(curSeg->u.segment.code, 4, nHandles * 2);
-	Fix_Adjust(curSeg, nHandles*2, 4);
-	Sym_Adjust(curSeg, nHandles*2, 4);
+    if (!(flags & LMF_NO_HANDLES) && (nHandles & 1) == 0)
+    {
+        Table_Insert(curSeg->u.segment.code, nHandles * 2, 4);
+        Table_StoreZeroes(curSeg->u.segment.code, 4, nHandles * 2);
+        Fix_Adjust(curSeg, nHandles * 2, 4);
+        Sym_Adjust(curSeg, nHandles * 2, 4);
     }
 
     /*
@@ -658,36 +650,39 @@ LMem_DefineChunk(TypePtr    type,   /* Type of data in the chunk */
      * we don't want if the chunk is to be empty.
      */
     dot = Table_Size(curSeg->u.segment.code) + 2;
-    
-    if (flags & LMF_NO_HANDLES) {
-	/*
-	 * The beast is actually a variable, since it's available for
-	 * immediate reference...
-	 */
-	sym = Sym_Enter(name, SYM_VAR, dot, type);
-    } else {
-	/*
-	 * Create the symbol for the chunk, giving the address of the block
-	 * as the addrsym.offset, nHandles*2 as the handle (this will never
-	 * change) and the passed type as the type of data stored in the chunk.
-	 */
-	sym = Sym_Enter(name, SYM_CHUNK, dot, nHandles*2, type);
 
-	/*
-	 * Up the number of handles and store it away.
-	 */
-	nHandles += 1;
-	b[0] = nHandles;
-	b[1] = nHandles >> 8;
-	Table_Store(curSeg->u.segment.data->pair->u.segment.code,
-		    2, (void *)b,
-		    offsetof(LMemBlockHeader,LMBH_nHandles));
+    if (flags & LMF_NO_HANDLES)
+    {
+        /*
+         * The beast is actually a variable, since it's available for
+         * immediate reference...
+         */
+        sym = Sym_Enter(name, SYM_VAR, dot, type);
+    }
+    else
+    {
+        /*
+         * Create the symbol for the chunk, giving the address of the block
+         * as the addrsym.offset, nHandles*2 as the handle (this will never
+         * change) and the passed type as the type of data stored in the chunk.
+         */
+        sym = Sym_Enter(name, SYM_CHUNK, dot, nHandles * 2, type);
+
+        /*
+         * Up the number of handles and store it away.
+         */
+        nHandles += 1;
+        b[0] = nHandles;
+        b[1] = nHandles >> 8;
+        Table_Store(curSeg->u.segment.data->pair->u.segment.code,
+            2,
+            (void*)b,
+            offsetof(LMemBlockHeader, LMBH_nHandles));
     }
 
-    return(sym);
+    return (sym);
 }
-    
-
+
 /***********************************************************************
  *				LMem_EndChunk
  ***********************************************************************
@@ -707,80 +702,93 @@ LMem_DefineChunk(TypePtr    type,   /* Type of data in the chunk */
  *	ardeb	8/15/89		Initial Revision
  *
  ***********************************************************************/
-void
-LMem_EndChunk(SymbolPtr	    sym)
+void LMem_EndChunk(SymbolPtr sym)
 {
-    word    size;
-    byte    b[4];
-    word    flags;	    /* Flags so we know whether there's a handle to
-			     * be fixed up */
+    word size;
+    byte b[4];
+    word flags; /* Flags so we know whether there's a handle to
+                 * be fixed up */
 
-    Table_Fetch(curSeg->u.segment.data->pair->u.segment.code, 2, (void *)b,
-		offsetof(LMemBlockHeader,LMBH_flags));
+    Table_Fetch(curSeg->u.segment.data->pair->u.segment.code,
+        2,
+        (void*)b,
+        offsetof(LMemBlockHeader, LMBH_flags));
     flags = b[0] | (b[1] << 8);
-    
+
     /*
      * Figure the final size of the chunk, including the size word
      */
     size = (dot - sym->u.addrsym.offset) + 2;
 
-    if (size == 2) {
-	if (flags & LMF_NO_HANDLES) {
-	    yyerror("empty chunks are not allowed inside lmem segments with no chunk handles");
-	    return;
-	}
-	
-	/*
-	 * Chunk is empty. This is handled specially. Rather than using four
-	 * bytes, we arrange for the handle to hold 0xffff and rein dot back
-	 * in to its previous location (2 less than it is now).
-	 */
-	b[1] = b[0] = 0xff;
+    if (size == 2)
+    {
+        if (flags & LMF_NO_HANDLES)
+        {
+            yyerror(
+                "empty chunks are not allowed inside lmem segments with no "
+                "chunk handles");
+            return;
+        }
 
-	Table_Store(curSeg->u.segment.code, 2, (void *)b,
-		    sym->u.chunk.handle);
+        /*
+         * Chunk is empty. This is handled specially. Rather than using four
+         * bytes, we arrange for the handle to hold 0xffff and rein dot back
+         * in to its previous location (2 less than it is now).
+         */
+        b[1] = b[0] = 0xff;
 
-	dot -= 2;
-    } else {
-	/*
-	 * Register a fixup for the handle to store the final address of the
-	 * chunk in the handle table, passing the chunk symbol as the data.
-	 */
-	if (!(flags & LMF_NO_HANDLES)) {
-	    Fix_Register(FC_FINAL, LMemFixHandle, sym->u.chunk.handle, 2, NULL,
-			 NULL, (Opaque)sym);
-	}
-			      
-	/*
-	 * Format it in the proper byte-order
-	 */
-	b[0] = size;
-	b[1] = size >> 8;
+        Table_Store(curSeg->u.segment.code, 2, (void*)b, sym->u.chunk.handle);
 
-	/*
-	 * Store the bytes in the size word for the chunk.
-	 */
-	(void)Table_Store(curSeg->u.segment.code, 2, (void *)b,
-			  sym->u.addrsym.offset-2);
+        dot -= 2;
+    }
+    else
+    {
+        /*
+         * Register a fixup for the handle to store the final address of the
+         * chunk in the handle table, passing the chunk symbol as the data.
+         */
+        if (!(flags & LMF_NO_HANDLES))
+        {
+            Fix_Register(FC_FINAL,
+                LMemFixHandle,
+                sym->u.chunk.handle,
+                2,
+                NULL,
+                NULL,
+                (Opaque)sym);
+        }
 
-	/*
-	 * The size of a chunk (including the size word) is padded to a
-	 * four-byte boundary so there can be enough pad bytes to ensure that
-	 * when chunk is shrunk down, the kernel can force there to be a
-	 * four-byte chunk of space for linking into the free list (size word +
-	 * next handle)
-	 */
-	if (size & 3) {
-	    /*
-	     * Pad the block out to a four-byte boundary so the next chunk
-	     * starts right. Note that kernel EC code expects extra bytes
-	     * to all be 0xcc, so that's what we store (3 bytes at most).
-	     */
-	    b[0] = b[1] = b[2] = 0xcc;
-	    (void)Table_Store(curSeg->u.segment.code, 4 - (size & 3),
-			      (void *)b, dot);
-	    dot += 4 - (size & 3);
-	}
+        /*
+         * Format it in the proper byte-order
+         */
+        b[0] = size;
+        b[1] = size >> 8;
+
+        /*
+         * Store the bytes in the size word for the chunk.
+         */
+        (void)Table_Store(
+            curSeg->u.segment.code, 2, (void*)b, sym->u.addrsym.offset - 2);
+
+        /*
+         * The size of a chunk (including the size word) is padded to a
+         * four-byte boundary so there can be enough pad bytes to ensure that
+         * when chunk is shrunk down, the kernel can force there to be a
+         * four-byte chunk of space for linking into the free list (size word +
+         * next handle)
+         */
+        if (size & 3)
+        {
+            /*
+             * Pad the block out to a four-byte boundary so the next chunk
+             * starts right. Note that kernel EC code expects extra bytes
+             * to all be 0xcc, so that's what we store (3 bytes at most).
+             */
+            b[0] = b[1] = b[2] = 0xcc;
+            (void)Table_Store(
+                curSeg->u.segment.code, 4 - (size & 3), (void*)b, dot);
+            dot += 4 - (size & 3);
+        }
     }
 
     /*
@@ -788,9 +796,7 @@ LMem_EndChunk(SymbolPtr	    sym)
      */
     PopSegment();
 }
-    
-    
-
+
 /***********************************************************************
  *				LMem_UsesHandles
  ***********************************************************************
@@ -809,15 +815,16 @@ LMem_EndChunk(SymbolPtr	    sym)
  *	ardeb	9/27/91		Initial Revision
  *
  ***********************************************************************/
-int
-LMem_UsesHandles(SymbolPtr  seg)
+int LMem_UsesHandles(SymbolPtr seg)
 {
-    byte    b[2];
-    word    flags;	    /* Flags so we know whether there's a handle to
-			     * be fixed up */
+    byte b[2];
+    word flags; /* Flags so we know whether there's a handle to
+                 * be fixed up */
 
-    Table_Fetch(seg->u.segment.code, 2, (void *)b,
-		offsetof(LMemBlockHeader,LMBH_flags));
+    Table_Fetch(seg->u.segment.code,
+        2,
+        (void*)b,
+        offsetof(LMemBlockHeader, LMBH_flags));
     flags = b[0] | (b[1] << 8);
 
     return (!(flags & LMF_NO_HANDLES));

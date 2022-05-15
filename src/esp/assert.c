@@ -25,30 +25,28 @@
  *
  ***********************************************************************/
 #ifndef lint
-static char *rcsid =
-"$Id: assert.c,v 1.12 93/09/09 12:34:45 adam Exp $";
+static char* rcsid = "$Id: assert.c,v 1.12 93/09/09 12:34:45 adam Exp $";
 #endif lint
 
-#include    "esp.h"
+#include "esp.h"
 
-#define ASSERTS_PER_SEG	32
+#define ASSERTS_PER_SEG 32
 
-typedef struct _ARec {
-    Expr    	*expr;	    /* Expression to evaluate */
-    char    	*msg;	    /* Message to give if failed */
+typedef struct _ARec
+{
+    Expr* expr; /* Expression to evaluate */
+    char* msg;  /* Message to give if failed */
 } ARec;
 
-typedef struct _Assert {
-    ARec    	    exprs[ASSERTS_PER_SEG];
-    ARec    	    *ptr;   	/* Next available slot */
-    struct _Assert  *next;
+typedef struct _Assert
+{
+    ARec exprs[ASSERTS_PER_SEG];
+    ARec* ptr; /* Next available slot */
+    struct _Assert* next;
 } Assertions;
 
+static Assertions* head;
 
-static Assertions    *head;
-
-		
-
 /***********************************************************************
  *				AssertProcessResult
  ***********************************************************************
@@ -65,38 +63,44 @@ static Assertions    *head;
  *	ardeb	10/8/91		Initial Revision
  *
  ***********************************************************************/
-static int
-AssertProcessResult(Expr    	*expr,
-		    ExprResult	*res,
-		    char    	*msg)
+static int AssertProcessResult(Expr* expr, ExprResult* res, char* msg)
 {
-    if (res->type != EXPR_TYPE_CONST) {
-	Notify(NOTIFY_ERROR, expr->file, expr->line,
-	       "Assertion yields non-numeric result");
-	return (0);
-    } else if (res->data.number == 0) {
-	if (msg) {
-	    /*
-	     * If message given, use it.
-	     */
-	    Notify(NOTIFY_ERROR, expr->file, expr->line, msg);
-	    free(msg);
-	} else {
-	    /*
-	     * Else just give general "Failed assertion" message.
-	     * Perhaps we should attempt to print out the
-	     * expression?
-	     */
-	    Notify(NOTIFY_ERROR, expr->file, expr->line, "Failed assertion");
-	}
-	return (0);
-    } else if (msg) {
-	free(msg);
+    if (res->type != EXPR_TYPE_CONST)
+    {
+        Notify(NOTIFY_ERROR,
+            expr->file,
+            expr->line,
+            "Assertion yields non-numeric result");
+        return (0);
     }
-    return(1);
+    else if (res->data.number == 0)
+    {
+        if (msg)
+        {
+            /*
+             * If message given, use it.
+             */
+            Notify(NOTIFY_ERROR, expr->file, expr->line, msg);
+            free(msg);
+        }
+        else
+        {
+            /*
+             * Else just give general "Failed assertion" message.
+             * Perhaps we should attempt to print out the
+             * expression?
+             */
+            Notify(NOTIFY_ERROR, expr->file, expr->line, "Failed assertion");
+        }
+        return (0);
+    }
+    else if (msg)
+    {
+        free(msg);
+    }
+    return (1);
 }
 
-
 /***********************************************************************
  *				Assert_Enter
  ***********************************************************************
@@ -114,17 +118,16 @@ AssertProcessResult(Expr    	*expr,
  *	ardeb	8/27/89		Initial Revision
  *
  ***********************************************************************/
-void
-Assert_Enter(Expr   *expr,  /* Assertion to be checked. Ownership of same
-			     * is transfered to this module, so it should
-			     * have been copied before being passed */
-	     char   *msg)   /* Message to give if expression evaluates false.
-			     * If null, standard "Assertion failed" is given.
-			     * As for "expr", ownership is transfered to this
-			     * module */
+void Assert_Enter(Expr* expr, /* Assertion to be checked. Ownership of same
+                               * is transfered to this module, so it should
+                               * have been copied before being passed */
+    char* msg)                /* Message to give if expression evaluates false.
+                               * If null, standard "Assertion failed" is given.
+                               * As for "expr", ownership is transfered to this
+                               * module */
 {
-    ExprResult	res;
-    byte    	status;
+    ExprResult res;
+    byte status;
 
     /*
      * First see if we can evaluate the thing now. If we can, there's no
@@ -134,36 +137,42 @@ Assert_Enter(Expr   *expr,  /* Assertion to be checked. Ownership of same
      * the second pass, as it will almost always be defined for the
      * first pass, but will yield the wrong result.
      */
-    if (Expr_InvolvesOp(expr, EXPR_DOTTYPE)) {
-	status = 0;
-    } else if (!Expr_Eval(expr, &res, EXPR_NOREF, &status)) {
-	Notify(NOTIFY_ERROR, expr->file, expr->line, (char *)res.type);
-	free(msg);
-	return;
+    if (Expr_InvolvesOp(expr, EXPR_DOTTYPE))
+    {
+        status = 0;
     }
-    
-    if ((status & EXPR_STAT_DELAY) || !(status & EXPR_STAT_DEFINED)) {
-	/*
-	 * Expression not resolvable yet, so save it and its message.
-	 */
-        if (head == NULL || (head->ptr == &head->exprs[ASSERTS_PER_SEG])) {
-	    Assertions  *a;
-	    
-	    a = (Assertions *)malloc(sizeof(Assertions));
-	    a->ptr = a->exprs;
-	    a->next = head;
-	    head = a;
-	}
-	
-	head->ptr->expr = Expr_Copy(expr, TRUE);
-	head->ptr->msg = msg;
-	head->ptr += 1;
-    } else {
-	(void)AssertProcessResult(expr, &res, msg);
+    else if (!Expr_Eval(expr, &res, EXPR_NOREF, &status))
+    {
+        Notify(NOTIFY_ERROR, expr->file, expr->line, (char*)res.type);
+        free(msg);
+        return;
+    }
+
+    if ((status & EXPR_STAT_DELAY) || !(status & EXPR_STAT_DEFINED))
+    {
+        /*
+         * Expression not resolvable yet, so save it and its message.
+         */
+        if (head == NULL || (head->ptr == &head->exprs[ASSERTS_PER_SEG]))
+        {
+            Assertions* a;
+
+            a = (Assertions*)malloc(sizeof(Assertions));
+            a->ptr = a->exprs;
+            a->next = head;
+            head = a;
+        }
+
+        head->ptr->expr = Expr_Copy(expr, TRUE);
+        head->ptr->msg = msg;
+        head->ptr += 1;
+    }
+    else
+    {
+        (void)AssertProcessResult(expr, &res, msg);
     }
 }
 
-
 /***********************************************************************
  *				Assert_DoAll
  ***********************************************************************
@@ -181,41 +190,46 @@ Assert_Enter(Expr   *expr,  /* Assertion to be checked. Ownership of same
  *	ardeb	8/27/89		Initial Revision
  *
  ***********************************************************************/
-int
-Assert_DoAll(void)
+int Assert_DoAll(void)
 {
-    ExprResult	    res;    	/* Result of evaluating the expression */
-    byte    	    status; 	/* Status byte from Expr_Eval (UNUSED) */
-    Assertions	    *a;	    	/* Current assertion segment */
-    ARec    	    *ePtr; 	/* Address of next expr to evaluate */
-    int	    	    retval = 1;	/* Assume everything's groovy */
+    ExprResult res; /* Result of evaluating the expression */
+    byte status;    /* Status byte from Expr_Eval (UNUSED) */
+    Assertions* a;  /* Current assertion segment */
+    ARec* ePtr;     /* Address of next expr to evaluate */
+    int retval = 1; /* Assume everything's groovy */
 
-    for (a = head; a != NULL; a = head) {
-	for (ePtr = a->exprs; ePtr < a->ptr; ePtr++) {
-	    /*
-	     * We lie about the symbols being in a final state b/c I can't
-	     * think of a case where you'd use assert to test the difference
-	     * of two symbols where the actual value would make a difference.
-	     * The only case that would matter is if they are equal, and if
-	     * they're not now, they never will be (code doesn't optimize to
-	     * nothing).
-	     */
-	    if (!Expr_Eval(ePtr->expr,
-			   &res,
-			   EXPR_NOUNDEF|EXPR_FINALIZE|EXPR_NOREF,
-			   &status))
-	    {
-		Notify(NOTIFY_ERROR, ePtr->expr->file, ePtr->expr->line,
-		       (char *)res.type);
-		retval = 0;
-	    } else {
-		retval = (AssertProcessResult(ePtr->expr, &res, ePtr->msg) 
-			  && retval);
-	    }
-	}
-	head = a->next;
-	free((char *)a);
+    for (a = head; a != NULL; a = head)
+    {
+        for (ePtr = a->exprs; ePtr < a->ptr; ePtr++)
+        {
+            /*
+             * We lie about the symbols being in a final state b/c I can't
+             * think of a case where you'd use assert to test the difference
+             * of two symbols where the actual value would make a difference.
+             * The only case that would matter is if they are equal, and if
+             * they're not now, they never will be (code doesn't optimize to
+             * nothing).
+             */
+            if (!Expr_Eval(ePtr->expr,
+                    &res,
+                    EXPR_NOUNDEF | EXPR_FINALIZE | EXPR_NOREF,
+                    &status))
+            {
+                Notify(NOTIFY_ERROR,
+                    ePtr->expr->file,
+                    ePtr->expr->line,
+                    (char*)res.type);
+                retval = 0;
+            }
+            else
+            {
+                retval = (AssertProcessResult(ePtr->expr, &res, ePtr->msg) &&
+                          retval);
+            }
+        }
+        head = a->next;
+        free((char*)a);
     }
 
-    return(retval);
+    return (retval);
 }
