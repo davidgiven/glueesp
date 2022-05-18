@@ -20,49 +20,18 @@
 #ifndef _ESP_H_
 #define _ESP_H_
 
-#include <config.h>
-#include <compat/queue.h>
-#include <compat/string.h>
-#include <compat/stdlib.h>
-
-#define sprintf biff_this_sprintf_we_have_our_own
-#include <stdio.h>
-#undef sprintf
-#include <stdarg.h>
-
-#include <mem.h>
-#include <os90.h>
-#include <bswap.h>
-#include <st.h> /* String table definitions */
-#include <malloc.h>
+#include "config.h"
+#include "mem.h"
+#include "bswap.h"
+#include "st.h" /* String table definitions */
 
 #if !defined(_LINUX)
 #define alloca(size) alloca_isnt_portable_you_goob_so_dont_use_it()
 #endif
 
-#define FALSE 0
-#define TRUE (!FALSE)
-
-/*
- * Memory tags
- */
-#define TAG_STRING_HEAD 1
-#define TAG_STRING_BLOCK 2
-#define TAG_MBLK 3
-#define TAG_EXPR_ELTS 4
-#define TAG_MACRO_ARG 5
-#define TAG_MACRO_ARG_VALUE 6
-#define TAG_PARSER_STACK 7
-#define TAG_FIX_EXPR 8
-#define TAG_EQUATE_EXPR 9
-#define TAG_BITFIELD_VALUE 10
-#define TAG_POP_OPERAND 11
-#define TAG_FIELD_VALUE 12
-
 /*
  * Basic machine types
  */
-typedef genptr Opaque;
 
 typedef struct _Symbol* SymbolPtr;
 
@@ -71,6 +40,7 @@ typedef struct _Symbol* SymbolPtr;
 #include "type.h"   /* Needed for Symbol definition */
 #include "table.h"  /* Needed for u.segment */
 #include "symbol.h" /* Everyone needs this.. */
+#include "gprintf.h"
 
 extern int yydebug;
 
@@ -224,13 +194,13 @@ extern void yyflush(void);
 extern void yydefmacro();
 extern void yystartmacro();
 
-/* printf.c */
-extern int printf(const char* fmt, ...);
-extern int fprintf(FILE* stream, const char* fmt, ...);
-extern int sprintf(char* str, const char* fmt, ...);
-extern int vfprintf(FILE* stream, const char* fmt, va_list args);
-extern int vprintf(const char* fmt, va_list args);
-extern int vsprintf(char* str, const char* fmt, va_list args);
+/* gprintf.c */
+extern int gprintf(const char* fmt, ...);
+extern int fgprintf(FILE* stream, const char* fmt, ...);
+extern int sgprintf(char* str, const char* fmt, ...);
+extern int vfgprintf(FILE* stream, const char* fmt, va_list args);
+extern int vgprintf(const char* fmt, va_list args);
+extern int vsgprintf(char* str, const char* fmt, va_list args);
 
 /* assert.c */
 extern void Assert_Enter(Expr* expr, char* msg);

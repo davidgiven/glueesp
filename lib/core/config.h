@@ -33,6 +33,7 @@ typedef void* malloc_t;
 #define _LINUX 1
 
 #define QUOTED_SLASH "/"
+#define PATHNAME_SLASH '/'
 #define SH_DENYWR 0
 #define SH_DENYRD 0
 #define SH_DENYRW 0

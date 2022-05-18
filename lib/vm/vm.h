@@ -33,7 +33,7 @@ typedef word VMBlockHandle; /* Handle to block in VM file */
 typedef word VMID;          /* Identifier assigned to a
                              * VMBlockHandle by the user */
 
-#define NULLHANDLE ((VMHandle)0)
+#define NULLH ((VMBlockHandle)0)
 
 #define SVMID_DB_MAP 0xff00
 #define SVMID_DB_GROUP 0xff01

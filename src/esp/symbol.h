@@ -23,8 +23,8 @@
 #ifndef _SYMBOL_H_
 #define _SYMBOL_H_
 
-#include <objfmt.h>
-#include <localize.h>
+#include "objfmt.h"
+#include "localize.h"
 
 /****************************************************************************
  *
@@ -52,7 +52,7 @@ typedef struct
     int numUsed; /* Number of classes whose methods are
                   * explicitly allowed to be bound to handlers
                   * for this class */
-    SymbolPtr used[LABEL_IN_STRUCT];
+    SymbolPtr used[];
 } ClassData;
 
 /*****************************************************************************

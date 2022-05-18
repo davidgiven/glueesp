@@ -1,0 +1,12 @@
+struct _OpCode
+%%
+c,          LANGUAGE, LANG_C, 
+small,           MEMMODEL, MM_SMALL, 
+pascal,LANGUAGE, LANG_PASCAL, 
+compact,             MEMMODEL, MM_COMPACT, 
+huge, MEMMODEL, MM_HUGE, 
+large,    MEMMODEL, MM_LARGE, 
+basic,           LANGUAGE, LANG_BASIC, 
+medium,    MEMMODEL, MM_MEDIUM, 
+fortran,             LANGUAGE, LANG_FORTRAN,
+

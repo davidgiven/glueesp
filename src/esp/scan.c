@@ -28,9 +28,6 @@
  *	Lexical analyzer for Esp. Taken mostly from the scanner for Asap.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: scan.c,v 1.51 94/03/31 13:20:54 jimmy Exp $";
-#endif lint
 
 #include "esp.h"
 #include "scan.h"
@@ -54,7 +51,7 @@ static char* rcsid = "$Id: scan.c,v 1.51 94/03/31 13:20:54 jimmy Exp $";
 #define toupper(c) _toupper(c)
 #endif
 
-#include <objfmt.h>
+#include "objfmt.h"
 
 int inmacro;
 int snarfLine = 0;
@@ -70,7 +67,7 @@ int lexdebug = 0;
 #define DBPRINTF(args) \
     if (lexdebug)      \
     {                  \
-        fprintf args;  \
+        fgprintf args; \
     }
 #else
 #define DBPRINTF(args)
@@ -84,7 +81,7 @@ int lexdebug = 0;
 #define DBG(args)
 #endif
 
-FILE* yyin = stdin;
+FILE* yyin;
 int yylineno = 1;
 
 LexProc* yylex;
@@ -385,10 +382,10 @@ static const unsigned char cbits[] = {
     N, /* 248 - 255 */
 };
 
-#define isfirstid(c) ((cbits + 1)[c] & F)
-#define isotherid(c) ((cbits + 1)[c] & O)
-#define isterm(c) ((cbits + 1)[c] & T)
-#define iseol(c) ((cbits + 1)[c] & E)
+#define isfirstid(c) ((cbits + 1)[(uint8_t)(c)] & F)
+#define isotherid(c) ((cbits + 1)[(uint8_t)(c)] & O)
+#define isterm(c) ((cbits + 1)[(uint8_t)(c)] & T)
+#define iseol(c) ((cbits + 1)[(uint8_t)(c)] & E)
 
 /*
  * Forward declarations
@@ -469,7 +466,7 @@ static MacState* freeState = (MacState*)NULL;
  *	ardeb	8/29/89		Initial Revision
  *
  ***********************************************************************/
-inline void yynewline(void)
+void yynewline(void)
 {
     yylineno++;
     bumpLine = 0;
@@ -1109,7 +1106,7 @@ static int NextID(char** pbPtr) /* Place to store original pushback pointer
 #undef MAX_HASH_VALUE
 #undef TOTAL_KEYWORDS
 
-#include "flopcode.h"
+#include "flopcodes.h"
 #undef MIN_WORD_LENGTH
 #undef MAX_WORD_LENGTH
 #undef MIN_HASH_VALUE
@@ -2109,7 +2106,7 @@ static void ScanInclude(void)
                     yylineno,
                     "Couldn't find include file %s\n",
                     yytext);
-                printf("%s : %s\n", dependFile, yytext);
+                gprintf("%s : %s\n", dependFile, yytext);
                 fflush(stdout);
             }
             else
@@ -2125,7 +2122,7 @@ static void ScanInclude(void)
              * Print name of file being included since we found it. Note
              * absence of full path! Only works for pmake...
              */
-            printf("%s : %s\n", dependFile, yytext);
+            gprintf("%s : %s\n", dependFile, yytext);
             fflush(stdout);
         }
 
@@ -3554,7 +3551,7 @@ int yystdwrap(void)
                 diff == 1 ? "" : "s");
             while (diff > 0)
             {
-                fprintf(stderr,
+                fgprintf(stderr,
                     "\tstarted at file \"%i\", line %d\n",
                     ifStack[iflevel].file,
                     ifStack[iflevel].line);
@@ -3682,7 +3679,7 @@ static void yycreatelocals(int numLocals)
     for (i = numMaps - numLocals; i < numMaps; i++)
     {
         maps[i] = (MBlk*)malloc(sizeof(MBlk));
-        sprintf(maps[i]->text, "??%04x", localCount++);
+        sgprintf(maps[i]->text, "??%04x", localCount++);
         maps[i]->length = 6;
         maps[i]->dynamic = TRUE;
         maps[i]->next = NULL;
@@ -4075,7 +4072,7 @@ static MBlk* yyreadmacrobody(
                  */
                 instring = 0;
             }
-            else if (c == '"' || c == '\'' && !instring)
+            else if (c == '"' || (c == '\'' && !instring))
             {
                 /*
                  * Found start of string -- avoid recognizing and skipping
@@ -5271,7 +5268,7 @@ void Scan_ToEndif(int orElse)
          */
         if (oldsm && wasmacro)
         {
-            fprintf(stderr, "%.*s", cp2 - word, word);
+            fgprintf(stderr, "%.*s", cp2 - word, word);
         }
         /*
          * Broke out properly -- push the token back into the input stream

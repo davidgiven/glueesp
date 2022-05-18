@@ -82,9 +82,6 @@
  *	Code generators. All functions are FixProc's...
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: code.c,v 3.43 95/09/20 14:50:21 weber Exp $";
-#endif lint
 
 #include "esp.h"
 #include "fixup.h"
@@ -94,7 +91,7 @@ static char* rcsid = "$Id: code.c,v 3.43 95/09/20 14:50:21 weber Exp $";
 
 #undef ASSERT /* Nuke .assert token... */
 
-#include <objfmt.h>
+#include "objfmt.h"
 
 /*****************************************************************************
  *
@@ -1071,25 +1068,22 @@ static FixResult CodeInitial(int* addrPtr, /* Start of instruction area */
          */
         if (e1 != NULL)
         {
-            if (malloc_size((void*)expr1->elts) != 0)
+            /*
+             * 'expr1' may have been reused. Regardless the elements
+             * are now located in some buffer allocated on the heap.
+             * We nuke this space, because it may not be the right
+             * size for the datal
+             */
+            if (expr1->elts == (ExprElt*)(expr1 + 1))
             {
-                /*
-                 * 'expr1' may have been reused. Regardless the elements
-                 * are now located in some buffer allocated on the heap.
-                 * We nuke this space, because it may not be the right
-                 * size for the datal
-                 */
-                if (expr1->elts == (ExprElt*)(expr1 + 1))
-                {
-                    Expr* q;
+                Expr* q;
 
-                    q = (Expr*)realloc((malloc_t)expr1, sizeof(Expr));
-                    assert(q == expr1);
-                }
-                else
-                {
-                    free((malloc_t)expr1->elts);
-                }
+                q = (Expr*)realloc((malloc_t)expr1, sizeof(Expr));
+                assert(q == expr1);
+            }
+            else
+            {
+                free((malloc_t)expr1->elts);
             }
             /*
              * Copy the expression.
@@ -1116,19 +1110,16 @@ static FixResult CodeInitial(int* addrPtr, /* Start of instruction area */
              * See the documentation for 'e1' above.
              */
 
-            if (malloc_size((void*)expr2->elts) != 0)
+            if (expr2->elts == (ExprElt*)(expr2 + 1))
             {
-                if (expr2->elts == (ExprElt*)(expr2 + 1))
-                {
-                    Expr* q;
+                Expr* q;
 
-                    q = (Expr*)realloc((malloc_t)expr2, sizeof(Expr));
-                    assert(q == expr2);
-                }
-                else
-                {
-                    free((malloc_t)expr2->elts);
-                }
+                q = (Expr*)realloc((malloc_t)expr2, sizeof(Expr));
+                assert(q == expr2);
+            }
+            else
+            {
+                free((malloc_t)expr2->elts);
             }
 
             *expr2 = *e2;
@@ -2202,8 +2193,8 @@ FixResult CodeArithCommon(int* addrPtr, /* Address for instruction.
         }
         else if ((((res2->data.number >= -128) && (res2->data.number <= 127)) ||
                      (!isDWord && (res2->data.number >= 65536 - 128)) ||
-                     isDWord && (res2->data.number >= (0xffffffffUL - 127))) &&
-                 !res2->rel.sym && notByte)
+                     (isDWord && (res2->data.number >= (0xffffffffUL - 127)) &&
+                         !res2->rel.sym && notByte)))
         {
             /*
              * Use sign-extended form of the instruction. To refresh
@@ -10280,45 +10271,58 @@ static const struct
     word pop;
     int mask;
 } regsave[] = {
-    0x50,
-    0x58,
-    1L << REG_AX,
-    0x51,
-    0x59,
-    1L << REG_CX,
-    0x52,
-    0x5a,
-    1L << REG_DX,
-    0x53,
-    0x5b,
-    1L << REG_BX,
-    0x54,
-    0x5c,
-    1L << REG_SP,
-    0x55,
-    0x5d,
-    1L << REG_BP,
-    0x56,
-    0x5e,
-    1L << REG_SI,
-    0x57,
-    0x5f,
-    1L << REG_DI,
-    0x06,
-    0x07,
-    1L << (REG_SEGBASE + REG_ES),
-    0x16,
-    0x17,
-    1L << (REG_SEGBASE + REG_SS),
-    0x1e,
-    0x1f,
-    1L << (REG_SEGBASE + REG_DS),
-    0x0fa0,
-    0x0fa1,
-    1L << (REG_SEGBASE + REG_FS),
-    0x0fa8,
-    0x0fa9,
-    1L << (REG_SEGBASE + REG_GS),
+    {
+     0x50,          0x58,
+     1L << REG_AX,
+     },
+    {
+     0x51,             0x59,
+     1L << REG_CX,
+     },
+    {
+     0x52,0x5a,
+     1L << REG_DX,
+     },
+    {
+     0x53,                   0x5b,
+     1L << REG_BX,
+     },
+    {
+     0x54, 0x5c,
+     1L << REG_SP,
+     },
+    {
+     0x55,          0x5d,
+     1L << REG_BP,
+     },
+    {
+     0x56,             0x5e,
+     1L << REG_SI,
+     },
+    {
+     0x57,         0x5f,
+     1L << REG_DI,
+     },
+    {
+     0x06,                   0x07,
+     1L << (REG_SEGBASE + REG_ES),
+     },
+    {
+     0x16, 0x17,
+     1L << (REG_SEGBASE + REG_SS),
+     },
+    {
+     0x1e,          0x1f,
+     1L << (REG_SEGBASE + REG_DS),
+     },
+    {
+     0x0fa0,             0x0fa1,
+     1L << (REG_SEGBASE + REG_FS),
+     },
+    {
+     0x0fa8, 0x0fa9,
+     1L << (REG_SEGBASE + REG_GS),
+     }
 };
 
 #define ALL_REG ((1L << REG_SEGBASE) - 1)

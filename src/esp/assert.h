@@ -19,9 +19,9 @@ void __eprintf(); /* Defined in gnulib */
 #include <stdio.h>
 #endif
 #if defined(__STDC__)
-#define __eprintf(str, line) fprintf(stderr, str, line)
+#define __eprintf(str, line) fgprintf(stderr, str, line)
 #else
-#define __eprintf(str, line, file) fprintf(stderr, str, line, file)
+#define __eprintf(str, line, file) fgprintf(stderr, str, line, file)
 #endif
 #endif
 

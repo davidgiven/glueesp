@@ -18,12 +18,8 @@
  *	Main module for Esp. Initialization and control.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: main.c,v 1.58 95/04/27 18:07:55 jimmy Exp $";
-#endif lint
 
 #include <config.h>
-#include <compat/file.h>
 #include "esp.h"
 #include "scan.h"
 
@@ -31,7 +27,7 @@ static char* rcsid = "$Id: main.c,v 1.58 95/04/27 18:07:55 jimmy Exp $";
 #include <sys/signal.h>
 #endif /* unix */
 
-#include <fileargs.h>
+#include "fileargs.h"
 
 #ifdef unix
 #define TMP_DIR "/tmp"
@@ -119,48 +115,48 @@ int warn_localize = 0;        /* Warn when localizable string doesn't
 int warn_anonymous_chunk = 0; /* Warn if the chunk has no name */
 
 WarnOpt warnOpts[] = {
-    "unref",
-    &warn_unref,
-    0,
-    "field",
-    &warn_field,
-    0,
-    "shadow",
-    &warn_shadow,
-    0,
-    "private",
-    &warn_private,
-    0,
-    "unreach",
-    &warn_unreach,
-    0,
-    "unknown",
-    &warn_unknown,
-    0,
-    "record",
-    &warn_record,
-    0,
-    "fall_thru",
-    &warn_fall_thru,
-    0,
-    "inline_data",
-    &warn_inline_data,
-    0,
-    "unref_local",
-    &warn_local_unref,
-    0,
-    "jmp",
-    &warn_jmp,
-    0,
-    "assume",
-    &warn_assume,
-    0,
-    "localize",
-    &warn_localize,
-    0,
-    "anonymous_chunk",
-    &warn_anonymous_chunk,
-    0,
+    {
+     "unref",          &warn_unref,
+     0, },
+    {
+     "field",               &warn_field,
+     0, },
+    {
+     "shadow",&warn_shadow,
+     0, },
+    {
+     "private",                 &warn_private,
+     0, },
+    {
+     "unreach",               &warn_unreach,
+     0, },
+    {
+     "unknown",        &warn_unknown,
+     0, },
+    {
+     "record",               &warn_record,
+     0, },
+    {
+     "fall_thru",&warn_fall_thru,
+     0, },
+    {
+     "inline_data",                 &warn_inline_data,
+     0, },
+    {
+     "unref_local",               &warn_local_unref,
+     0, },
+    {
+     "jmp",         &warn_jmp,
+     0, },
+    {
+     "assume",               &warn_assume,
+     0, },
+    {
+     "localize",             &warn_localize,
+     0, },
+    {
+     "anonymous_chunk",                 &warn_anonymous_chunk,
+     0, },
 };
 const int numWarnOpts = sizeof(warnOpts) / sizeof(warnOpts[0]);
 
@@ -190,19 +186,9 @@ int numLibNames = 0;
  *	ardeb	11/ 8/89	Initial Revision
  *
  ***********************************************************************/
-static volatile void CleanUp(void)
+static volatile void CleanUp(int)
 {
-#if defined(unix)
-    extern volatile void exit(int);
-#else
-    /* Novell seems to need the file to be closed before deleting it */
-    if (output != 0)
-    {
-        VMClose(output);
-    }
-#endif
     (void)unlink(outFile);
-
     exit(1);
 }
 
@@ -229,16 +215,16 @@ void Usage(char* fmt, ...)
 
     va_start(args, fmt);
 
-    vfprintf(stderr, fmt, args);
+    vfgprintf(stderr, fmt, args);
 
-    fprintf(stderr,
+    fgprintf(stderr,
         "\nUsage: esp [-o <file>] [-I<dir> ...] [-M] [<warnings>] [-L "
         "<lmem-align>] [-G <geos-rel>] [-l <loc-out-file>] [-2] <file>\n [-v]");
 
-    fprintf(stderr, "Available warning options:");
+    fgprintf(stderr, "Available warning options:");
     for (i = 0; i < sizeof(warnOpts) / sizeof(warnOpts[0]); i++)
     {
-        fprintf(stderr, " -W%s", warnOpts[i].flag);
+        fgprintf(stderr, " -W%s", warnOpts[i].flag);
     }
     putc('\n', stderr);
 
@@ -281,7 +267,7 @@ char* FindFile(char* file)
             }
             else
             {
-                sprintf(name, "%s%c%s", dirs[i], PATHNAME_SLASH, file);
+                sgprintf(name, "%s%c%s", dirs[i], PATHNAME_SLASH, file);
             }
             if (access(name, F_OK) == 0)
             {
@@ -342,11 +328,11 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
         {
             if (curProc != (SymbolPtr)NULL)
             {
-                fprintf(stderr, "%i: In procedure %i:\n", file, curProc->name);
+                fgprintf(stderr, "%i: In procedure %i:\n", file, curProc->name);
             }
             else
             {
-                fprintf(stderr, "%i: At top level:\n", file);
+                fgprintf(stderr, "%i: At top level:\n", file);
             }
         }
     }
@@ -359,7 +345,7 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
         /*
          * Record another error as having happened
          */
-        fprintf(stderr, "error: ");
+        fgprintf(stderr, "error: ");
         errors++;
     }
     else if (why == NOTIFY_WARNING)
@@ -367,7 +353,7 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
         /*
          * Tell the user this is only a warning.
          */
-        fprintf(stderr, "warning: ");
+        fgprintf(stderr, "warning: ");
     }
 
     /*
@@ -377,17 +363,17 @@ void NotifyInt(NotifyType why, /* What are you telling me? */
     {
         if (line == -1)
         {
-            fprintf(stderr, "file \"%i\" at end of file: ", file);
+            fgprintf(stderr, "file \"%i\" at end of file: ", file);
         }
         else
         {
-            fprintf(stderr, "file \"%i\", line %d: ", file, line);
+            fgprintf(stderr, "file \"%i\", line %d: ", file, line);
         }
     }
     /*
      * Send the message to stderr
      */
-    vfprintf(stderr, fmt, args);
+    vfgprintf(stderr, fmt, args);
 
     /*
      * If not a debug message, spew a newline out too.
@@ -426,39 +412,6 @@ void Notify(NotifyType why, ID file, int line, char* fmt, ...)
 }
 
 /***********************************************************************
- *				DebugMem
- ***********************************************************************
- * SYNOPSIS:	Dump memory usage stats
- * CALLED BY:	main
- * RETURN:	nothing
- * SIDE EFFECTS:file esp_mem.<suffix> created and filled
- *
- * STRATEGY:
- *
- * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	4/ 8/92		Initial Revision
- *
- ***********************************************************************/
-static void DebugMem(char* suffix)
-{
-    char name[32];
-    FILE* stream;
-
-    sprintf(name, "esp_mem.%s", suffix);
-    stream = fopen(name, "w");
-
-    if (stream != NULL)
-    {
-
-        malloc_printstats((malloc_printstats_callback*)fprintf, stream);
-        fclose(stream);
-        fprintf(stderr, "%s memory stats dumped to %s\n", suffix, name);
-    }
-}
-
-/***********************************************************************
  *				main
  ***********************************************************************
  * SYNOPSIS:	  Guess what?
@@ -474,8 +427,7 @@ static void DebugMem(char* suffix)
  *	ardeb	8/29/88		Initial Revision
  *
  ***********************************************************************/
-void main(argc, argv) int argc;
-char** argv;
+int main(int argc, char** argv)
 {
     int ac;         /* Index into argc */
     char* source;   /* Name of source file */
@@ -483,15 +435,9 @@ char** argv;
     short status;   /* Status of VMOpen of output file */
     int doDefs = 0; /* Set if -D flag encountered */
     int i;
-    int debugmem = 0;
     int currentMaxDirs = INITIAL_DIRS; /* number of spaces available*/
                                        /* for directories */
     char* libNameStr = 0;
-
-    /*
-     * We don't do anything about errors...
-     */
-    malloc_noerr(1);
 
     /* allocate a reseanable number of spaces for directories */
     dirs = (char**)malloc(INITIAL_DIRS * sizeof(char*));
@@ -626,10 +572,6 @@ char** argv;
                         {
                             debug = 1;
                         }
-                        if (index(argv[ac], 'm'))
-                        {
-                            debugmem = 1;
-                        }
                     }
                     break;
                 }
@@ -739,7 +681,7 @@ char** argv;
                             /*
                              * Remove first set, and make sure no other is.
                              */
-                            align &= ~(1 << first - 1);
+                            align &= ~((1 << first) - 1);
                             first = ffs(align);
                         }
                         else
@@ -843,7 +785,7 @@ char** argv;
                     /*
                      * Display the build date and time of this tool.
                      */
-                    printf("esp was built on %s %s\n", __DATE__, __TIME__);
+                    gprintf("esp was built on %s %s\n", __DATE__, __TIME__);
                     exit(1);
                     /*NOTREACHED*/
                     break;
@@ -910,7 +852,7 @@ char** argv;
 
     if (path == NULL)
     {
-        fprintf(stderr, "Cannot locate %s\n", source);
+        fgprintf(stderr, "Cannot locate %s\n", source);
         exit(1);
     }
 
@@ -978,7 +920,7 @@ char** argv;
 
     if (symStrings == 0)
     {
-        fprintf(
+        fgprintf(
             stderr, "Couldn't create temporary string table in %s\n", outFile);
         VMClose(output);
         exit(1);
@@ -1046,7 +988,7 @@ char** argv;
 
     if (permStrings == 0)
     {
-        fprintf(stderr, "Couldn't create string table in %s\n", outFile);
+        fgprintf(stderr, "Couldn't create string table in %s\n", outFile);
         VMClose(output);
         exit(1);
     }
@@ -1074,7 +1016,7 @@ char** argv;
             if (strcmp(cp, ".asm") == 0)
             {
                 dependFile = (char*)malloc(cp - source + 4 + 1);
-                sprintf(dependFile, "%.*s.obj", cp - source, source);
+                sgprintf(dependFile, "%.*s.obj", cp - source, source);
             }
             else
             {
@@ -1082,7 +1024,7 @@ char** argv;
             }
         }
 
-        printf("%s : %s\n", dependFile, source);
+        gprintf("%s : %s\n", dependFile, source);
     }
 
     /*
@@ -1176,10 +1118,6 @@ char** argv;
         goto err_exit;
     }
 
-    if (debugmem)
-    {
-        DebugMem("pass1");
-    }
     /*
      * Perform remaining passes:
      *	- assertions
@@ -1195,18 +1133,9 @@ char** argv;
         goto err_exit;
     }
 
-    if (debugmem)
-    {
-        DebugMem("assert");
-    }
     if (!Fix_Pass2())
     {
         goto err_exit;
-    }
-
-    if (debugmem)
-    {
-        DebugMem("pass2");
     }
 
     if (!Fix_Pass3())
@@ -1214,19 +1143,9 @@ char** argv;
         goto err_exit;
     }
 
-    if (debugmem)
-    {
-        DebugMem("pass3");
-    }
-
     if (!Fix_Pass4())
     {
         goto err_exit;
-    }
-
-    if (debugmem)
-    {
-        DebugMem("pass4");
     }
 
     if (!Sym_ProcessSegments() || errors)
@@ -1234,20 +1153,10 @@ char** argv;
         goto err_exit;
     }
 
-    if (debugmem)
-    {
-        DebugMem("output");
-    }
-
     ST_Destroy(output, symStrings);
     ST_Close(output, permStrings);
 
     VMClose(output);
-
-    if (debugmem)
-    {
-        DebugMem("final");
-    }
 
     if (localize)
     {
@@ -1295,6 +1204,6 @@ void malloc_err(int fatal, char* str, int len)
     write(2, str, len);
     if (fatal)
     {
-        CleanUp();
+        CleanUp(0);
     }
 }

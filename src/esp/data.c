@@ -29,13 +29,6 @@
  *	(there being nothing to optimize or finalize as far as data go).
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: data.c,v 1.35 94/11/10 14:51:34 adam Exp $";
-#endif lint
-
-#if defined(__HIGHC__)
-pragma Code("MYDATA");
-#endif
 
 #include "esp.h"
 #include "scan.h"
@@ -1486,12 +1479,12 @@ static int DataParse(DataState* state, LexProc* newyylex, InputProc* newyyinput)
 #define DESD_NO_STRING_SHIFT 8
 
 #define DESD_SIZE(data) \
-    ((((unsigned int)(data)) & DESD_SIZE_MASK) >> DESD_SIZE_SHIFT)
-#define DESD_CHUNK_ONLY(data) (((unsigned int)(data)) & DESD_CHUNK_ONLY_MASK)
+    ((((uintptr_t)(data)) & DESD_SIZE_MASK) >> DESD_SIZE_SHIFT)
+#define DESD_CHUNK_ONLY(data) (((uintptr_t)(data)) & DESD_CHUNK_ONLY_MASK)
 #define DESD_FIX_TYPE(data) \
-    ((((unsigned int)(data)) & DESD_FIX_TYPE_MASK) >> DESD_FIX_TYPE_SHIFT)
+    ((((uintptr_t)(data)) & DESD_FIX_TYPE_MASK) >> DESD_FIX_TYPE_SHIFT)
 #define DESD_NO_STRING(data) \
-    ((((unsigned int)(data)) & DESD_NO_STRING_MASK) >> DESD_NO_STRING_SHIFT)
+    ((((uintptr_t)(data)) & DESD_NO_STRING_MASK) >> DESD_NO_STRING_SHIFT)
 
 /***********************************************************************
  *				DataEnterSingle
@@ -1969,14 +1962,15 @@ static int DataEnterInt(int* addrPtr, /* IN/OUT: address at which to store */
      * actually an integer (it's a record or enum), do not allow a string to
      * initialize the thing.
      */
-    data =
-        (Opaque)(((size << DESD_SIZE_SHIFT) & DESD_SIZE_MASK) |
-                 ((chunkOnly << DESD_CHUNK_ONLY_SHIFT) & DESD_CHUNK_ONLY_MASK) |
-                 ((fixType << DESD_FIX_TYPE_SHIFT) & DESD_FIX_TYPE_MASK) |
-                 (((type->tn_type != TYPE_INT) &&
-                      (type->tn_type != TYPE_SIGNED))
-                         ? DESD_NO_STRING_MASK
-                         : 0));
+    data = (Opaque)(uintptr_t)(((size << DESD_SIZE_SHIFT) & DESD_SIZE_MASK) |
+                               ((chunkOnly << DESD_CHUNK_ONLY_SHIFT) &
+                                   DESD_CHUNK_ONLY_MASK) |
+                               ((fixType << DESD_FIX_TYPE_SHIFT) &
+                                   DESD_FIX_TYPE_MASK) |
+                               (((type->tn_type != TYPE_INT) &&
+                                    (type->tn_type != TYPE_SIGNED))
+                                       ? DESD_NO_STRING_MASK
+                                       : 0));
 
     do
     {

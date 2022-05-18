@@ -1,0 +1,17 @@
+struct _OpCode
+%%
+default, DEFAULT, 0, 
+state,        STATE, 1, 
+static,STATIC, 0, 
+export,          EXPORT, 0, 
+variant,        VARIANT, 0, 
+dynamic,  DYNAMIC, 0, 
+reloc,        RELOC, 0, 
+vardata,VARDATA, 0, 
+endstate,          STATE, 0, 
+extern,        GLOBAL, 0, 
+noreloc,   NORELOC, 0, 
+public,        CPUBLIC, 0, 
+private,        PRIVATE, 0, 
+master,          MASTER, 0, 
+message,        METHOD, 0,

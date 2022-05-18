@@ -174,7 +174,7 @@ typedef int LexProc(YYSTYPE*, ...);       /* Return a token */
 typedef char InputProc();                 /* Return a char to yylex */
 typedef int WrapProc();                   /* Return 0 if not at real EOF */
 typedef const OpCode* OpProc(const char*, /* Search a table for an opcode */
-    unsigned int len);
+    size_t len);
 
 extern File* curFile;  /* Current input file */
 extern int ignore;     /* TRUE if should ignore include directives and

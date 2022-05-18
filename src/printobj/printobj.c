@@ -81,7 +81,7 @@ void DumpBlock(VMHandle file, VMBlockHandle block)
 
     if (block == NULL)
     {
-        printf("\tNONE\n");
+        gprintf("\tNONE\n");
         return;
     }
 
@@ -92,7 +92,7 @@ void DumpBlock(VMHandle file, VMBlockHandle block)
     {
         int n;
 
-        printf("%04xh  ", start - base);
+        gprintf("%04xh  ", start - base);
 
         n = 16;
         if (n > size)
@@ -101,9 +101,9 @@ void DumpBlock(VMHandle file, VMBlockHandle block)
         }
         for (i = n, bp = start; i > 0; bp++, i--)
         {
-            printf("%02x ", *bp);
+            gprintf("%02x ", *bp);
         }
-        printf("%*s\"", (16 - n) * 3 + 2, "");
+        gprintf("%*s\"", (16 - n) * 3 + 2, "");
         for (i = n, bp = start; i > 0; bp++, i--)
         {
             if (isprint(*bp))
@@ -115,7 +115,7 @@ void DumpBlock(VMHandle file, VMBlockHandle block)
                 putchar('.');
             }
         }
-        printf("\"\n");
+        gprintf("\"\n");
         size -= n;
     }
     VMUnlock(file, block);
@@ -128,30 +128,30 @@ void PrintType(VMHandle file, VMBlockHandle types, word type)
         switch (type & OTYPE_TYPE)
         {
             case OTYPE_INT:
-                printf("int(%d)", (type & OTYPE_DATA) >> 1);
+                gprintf("int(%d)", (type & OTYPE_DATA) >> 1);
                 break;
             case OTYPE_SIGNED:
-                printf("signed(%d)", (type & OTYPE_DATA) >> 1);
+                gprintf("signed(%d)", (type & OTYPE_DATA) >> 1);
                 break;
             case OTYPE_NEAR:
-                printf("near");
+                gprintf("near");
                 break;
             case OTYPE_FAR:
-                printf("far");
+                gprintf("far");
                 break;
             case OTYPE_CHAR:
-                printf("char(%d)", ((type & OTYPE_DATA) >> 1) + 1);
+                gprintf("char(%d)", ((type & OTYPE_DATA) >> 1) + 1);
                 break;
             case OTYPE_VOID:
-                printf("void");
+                gprintf("void");
                 break;
             case OTYPE_PTR:
-                printf("%cptr", (type & OTYPE_DATA) >> 1);
+                gprintf("%cptr", (type & OTYPE_DATA) >> 1);
                 break;
             case OTYPE_BITFIELD:
                 if (type & OTYPE_BF_WIDTH)
                 {
-                    printf("%ssigned bitfield@%d, %d bit%s",
+                    gprintf("%ssigned bitfield@%d, %d bit%s",
                         (type & OTYPE_BF_SIGNED) ? "" : "un",
                         (type & OTYPE_BF_OFFSET) >> OTYPE_BF_OFFSET_SHIFT,
                         (type & OTYPE_BF_WIDTH) >> OTYPE_BF_WIDTH_SHIFT,
@@ -161,7 +161,7 @@ void PrintType(VMHandle file, VMBlockHandle types, word type)
                 }
                 else
                 {
-                    printf("bitfield");
+                    gprintf("bitfield");
                 }
                 break;
         }
@@ -172,19 +172,19 @@ void PrintType(VMHandle file, VMBlockHandle types, word type)
 
         if (OTYPE_IS_STRUCT(t->words[0]))
         {
-            printf("struct(%i)", OTYPE_STRUCT_ID(t));
+            gprintf("struct(%i)", OTYPE_STRUCT_ID(t));
         }
         else if (OTYPE_IS_PTR(t->words[0]))
         {
-            printf("%cptr(", OTYPE_PTR_TYPE(t->words[0]));
+            gprintf("%cptr(", OTYPE_PTR_TYPE(t->words[0]));
             PrintType(file, types, t->words[1]);
-            printf(")");
+            gprintf(")");
         }
         else
         {
-            printf("%d array(", OTYPE_ARRAY_LEN(t->words[0]));
+            gprintf("%d array(", OTYPE_ARRAY_LEN(t->words[0]));
             PrintType(file, types, t->words[1]);
-            printf(")");
+            gprintf(")");
         }
         VMUnlock(file, types);
     }
@@ -206,7 +206,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
 
         if (hdr->seg != segOff)
         {
-            printf(
+            gprintf(
                 "************** WARNING: hdr->seg (%d) != segOff (%d) "
                 "************\n",
                 hdr->seg,
@@ -217,7 +217,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
 
         if (debug)
         {
-            printf("Block %04xh, %d symbols, types = %04xh\n",
+            gprintf("Block %04xh, %d symbols, types = %04xh\n",
                 block,
                 n,
                 hdr->types);
@@ -226,7 +226,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
         {
             if (debug)
             {
-                printf("%04x\t%-20i: %s%s%s%s",
+                gprintf("%04x\t%-20i: %s%s%s%s",
                     (genptr)sym - (genptr)hdr,
                     sym->name,
                     sym->flags & OSYM_MOVABLE ? "movable " : "",
@@ -236,7 +236,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
             }
             else
             {
-                printf("\t%-20i: %s%s%s%s",
+                gprintf("\t%-20i: %s%s%s%s",
                     sym->name,
                     sym->flags & OSYM_MOVABLE ? "movable " : "",
                     sym->flags & OSYM_GLOBAL ? "global " : "",
@@ -246,118 +246,118 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
             switch (sym->type)
             {
                 case OSYM_TYPEDEF:
-                    printf("typedef to ");
+                    gprintf("typedef to ");
                     PrintType(file, hdr->types, sym->u.typeDef.type);
-                    printf("\n");
+                    gprintf("\n");
                     break;
                 case OSYM_STRUCT:
-                    printf("%d-byte structure:\n", sym->u.sType.size);
+                    gprintf("%d-byte structure:\n", sym->u.sType.size);
                     break;
                 case OSYM_UNION:
-                    printf("%d-byte union:\n", sym->u.sType.size);
+                    gprintf("%d-byte union:\n", sym->u.sType.size);
                     break;
                 case OSYM_RECORD:
-                    printf("%d-byte record:\n", sym->u.sType.size);
+                    gprintf("%d-byte record:\n", sym->u.sType.size);
                     break;
                 case OSYM_ETYPE:
-                    printf("%d-byte enumerated type:\n", sym->u.sType.size);
+                    gprintf("%d-byte enumerated type:\n", sym->u.sType.size);
                     break;
                 case OSYM_FIELD:
-                    printf("field at %d: ", sym->u.sField.offset);
+                    gprintf("field at %d: ", sym->u.sField.offset);
                     PrintType(file, hdr->types, sym->u.sField.type);
                     if (debug)
                     {
-                        printf(" (next = %04x)\n", sym->u.sField.next);
+                        gprintf(" (next = %04x)\n", sym->u.sField.next);
                     }
                     else
                     {
-                        printf("\n");
+                        gprintf("\n");
                     }
                     break;
                 case OSYM_BITFIELD:
-                    printf("bitfield %d:%d ",
+                    gprintf("bitfield %d:%d ",
                         sym->u.bField.offset,
                         sym->u.bField.width);
                     PrintType(file, hdr->types, sym->u.bField.type);
                     if (debug)
                     {
-                        printf(" (next = %04x)\n", sym->u.bField.next);
+                        gprintf(" (next = %04x)\n", sym->u.bField.next);
                     }
                     else
                     {
-                        printf("\n");
+                        gprintf("\n");
                     }
                     break;
                 case OSYM_ENUM:
-                    printf("enum, value %d", sym->u.eField.value);
+                    gprintf("enum, value %d", sym->u.eField.value);
                     if (debug)
                     {
-                        printf(" (next = %04x)\n", sym->u.eField.next);
+                        gprintf(" (next = %04x)\n", sym->u.eField.next);
                     }
                     else
                     {
-                        printf("\n");
+                        gprintf("\n");
                     }
                     break;
                 case OSYM_VARDATA:
-                    printf("vardata, value %d, data = ", sym->u.varData.value);
+                    gprintf("vardata, value %d, data = ", sym->u.varData.value);
                     PrintType(file, hdr->types, sym->u.varData.type);
                     if (debug)
                     {
-                        printf(" (next = %04x)\n", sym->u.varData.next);
+                        gprintf(" (next = %04x)\n", sym->u.varData.next);
                     }
                     else
                     {
-                        printf("\n");
+                        gprintf("\n");
                     }
                     break;
                 case OSYM_METHOD:
-                    printf("method number %d%s%s",
+                    gprintf("method number %d%s%s",
                         sym->u.method.value,
                         sym->flags & OSYM_REF ? " referenced" : " UNREF",
                         sym->u.method.flags & OSYM_METH_PUBLIC ? " public"
                                                                : "");
                     if (sym->u.method.flags & OSYM_METH_RANGE)
                     {
-                        printf(" %d-message exported range",
+                        gprintf(" %d-message exported range",
                             (sym->u.method.flags & OSYM_METH_RANGE_LENGTH) >>
                                 OSYM_METH_RANGE_LENGTH_OFFSET);
                     }
                     if (debug)
                     {
-                        printf(" (next = %04x)\n", sym->u.method.next);
+                        gprintf(" (next = %04x)\n", sym->u.method.next);
                     }
                     else
                     {
-                        printf("\n");
+                        gprintf("\n");
                     }
                     break;
                 case OSYM_CONST:
-                    printf("constant value %d (%04xh)\n",
+                    gprintf("constant value %d (%04xh)\n",
                         sym->u.constant.value,
                         sym->u.constant.value);
                     break;
                 case OSYM_PROTOMINOR:
-                    printf("protominor token %s\n",
+                    gprintf("protominor token %s\n",
                         sym->flags & OSYM_REF ? " referenced" : " UNREF");
                     break;
                 case OSYM_VAR:
-                    printf("variable at %04x, type ", sym->u.variable.address);
+                    gprintf("variable at %04x, type ", sym->u.variable.address);
                     PrintType(file, hdr->types, sym->u.variable.type);
-                    printf("\n");
+                    gprintf("\n");
                     break;
                 case OSYM_CHUNK:
-                    printf("chunk at %04x, type ", sym->u.chunk.handle);
+                    gprintf("chunk at %04x, type ", sym->u.chunk.handle);
                     PrintType(file, hdr->types, sym->u.chunk.type);
-                    printf("\n");
+                    gprintf("\n");
                     break;
                 case OSYM_PROC:
                     if (debug)
                     {
-                        printf(useDecimal ? "%s%s%s%s%s%s procedure at %d "
-                                            "(local = %04x)\n"
-                                          : "%s%s%s%s%s%s procedure at %04x "
-                                            "(local = %04x)\n",
+                        gprintf(useDecimal ? "%s%s%s%s%s%s procedure at %d "
+                                             "(local = %04x)\n"
+                                           : "%s%s%s%s%s%s procedure at %04x "
+                                             "(local = %04x)\n",
                             (sym->u.proc.flags & OSYM_WEIRD) ? "weird " : "",
                             (sym->u.proc.flags & OSYM_NO_JMP) ? "no-jump " : "",
                             (sym->u.proc.flags & OSYM_NO_CALL) ? "no-call "
@@ -373,8 +373,8 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                     }
                     else
                     {
-                        printf(useDecimal ? "%s%s%s%s%s%s procedure at %d\n"
-                                          : "%s%s%s%s%s%s procedure at %04x\n",
+                        gprintf(useDecimal ? "%s%s%s%s%s%s procedure at %d\n"
+                                           : "%s%s%s%s%s%s procedure at %04x\n",
                             (sym->u.proc.flags & OSYM_WEIRD) ? "weird " : "",
                             (sym->u.proc.flags & OSYM_NO_JMP) ? "no-jump " : "",
                             (sym->u.proc.flags & OSYM_NO_CALL) ? "no-call "
@@ -389,7 +389,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                     }
                     break;
                 case OSYM_LABEL:
-                    printf(
+                    gprintf(
                         useDecimal ? "%s label at %d\n" : "%s label at %04x\n",
                         sym->u.label.near ? "near" : "far",
                         sym->u.label.address);
@@ -397,53 +397,53 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                 case OSYM_LOCLABEL:
                     if (!debug)
                     {
-                        printf(useDecimal ? "local label at %d\n"
-                                          : "local label at %04x\n",
+                        gprintf(useDecimal ? "local label at %d\n"
+                                           : "local label at %04x\n",
                             sym->u.label.address);
                     }
                     else
                     {
-                        printf(useDecimal
-                                   ? "local label at %d (next = %04x)\n"
-                                   : "local label at %04x (next = %04x)\n",
+                        gprintf(useDecimal
+                                    ? "local label at %d (next = %04x)\n"
+                                    : "local label at %04x (next = %04x)\n",
                             sym->u.label.address,
                             sym->u.procLocal.next);
                     }
                     break;
                 case OSYM_LOCVAR:
-                    printf("local variable at %d[bp], type ",
+                    gprintf("local variable at %d[bp], type ",
                         sym->u.localVar.offset);
                     PrintType(file, hdr->types, sym->u.localVar.type);
-                    printf("\n");
+                    gprintf("\n");
                     break;
                 case OSYM_REGVAR:
-                    printf("local register variable in %s\n",
+                    gprintf("local register variable in %s\n",
                         registers[sym->u.localVar.offset]);
                     break;
                 case OSYM_ONSTACK:
-                    printf(useDecimal ? "stack descriptor at %d: %i\n"
-                                      : "stack descriptor at %04x: %i\n",
+                    gprintf(useDecimal ? "stack descriptor at %d: %i\n"
+                                       : "stack descriptor at %04x: %i\n",
                         sym->u.onStack.address,
                         OBJ_FETCH_SID(sym->u.onStack.desc));
                     break;
                 case OSYM_BLOCKSTART:
                     if (debug)
                     {
-                        printf(useDecimal ? "block locals at %d: "
-                                          : "block locals at %04x: ",
+                        gprintf(useDecimal ? "block locals at %d: "
+                                           : "block locals at %04x: ",
                             sym->u.blockStart.local);
                     }
-                    printf(useDecimal ? "block start at %d\n"
-                                      : "block start at %04x\n",
+                    gprintf(useDecimal ? "block start at %d\n"
+                                       : "block start at %04x\n",
                         sym->u.blockStart.address);
                     break;
                 case OSYM_BLOCKEND:
-                    printf(useDecimal ? "block end at %d\n"
-                                      : "block end at %04x\n",
+                    gprintf(useDecimal ? "block end at %d\n"
+                                       : "block end at %04x\n",
                         sym->u.blockEnd.address);
                     break;
                 case OSYM_EXTTYPE:
-                    printf("external type (%s)\n",
+                    gprintf("external type (%s)\n",
                         (sym->u.extType.stype == OSYM_STRUCT
                                 ? "structure"
                                 : (sym->u.extType.stype == OSYM_ETYPE
@@ -456,25 +456,25 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                                                               : "?")))));
                     break;
                 case OSYM_CLASS:
-                    printf(useDecimal ? "class at %d, super = %i\n"
-                                      : "class at %04x, super = %i\n",
+                    gprintf(useDecimal ? "class at %d, super = %i\n"
+                                       : "class at %04x, super = %i\n",
                         sym->u.class.address,
                         OBJ_FETCH_SID(sym->u.class.super));
                     break;
                 case OSYM_MASTER_CLASS:
-                    printf(useDecimal ? "master class at %d, super = %i\n"
-                                      : "master class at %04x, super = %i\n",
+                    gprintf(useDecimal ? "master class at %d, super = %i\n"
+                                       : "master class at %04x, super = %i\n",
                         sym->u.class.address,
                         OBJ_FETCH_SID(sym->u.class.super));
                     break;
                 case OSYM_VARIANT_CLASS:
-                    printf(useDecimal ? "variant class at %d, super = %i\n"
-                                      : "variant class at %04x, super = %i\n",
+                    gprintf(useDecimal ? "variant class at %d, super = %i\n"
+                                       : "variant class at %04x, super = %i\n",
                         sym->u.class.address,
                         OBJ_FETCH_SID(sym->u.class.super));
                     break;
                 case OSYM_BINDING:
-                    printf("bound to %i (%s)\n",
+                    gprintf("bound to %i (%s)\n",
                         OBJ_FETCH_SID(sym->u.binding.proc),
                         (sym->u.binding.callType == OSYM_DYNAMIC
                                 ? "dynamic"
@@ -491,14 +491,14 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                                                                 "static")))));
                     break;
                 case OSYM_MODULE:
-                    printf("module: table = %04x, offset = %d\n",
+                    gprintf("module: table = %04x, offset = %d\n",
                         sym->u.module.table,
                         sym->u.module.offset);
                     break;
                 case OSYM_RETURN_TYPE:
-                    printf("procedure return type = ");
+                    gprintf("procedure return type = ");
                     PrintType(file, hdr->types, sym->u.localVar.type);
-                    printf("\n");
+                    gprintf("\n");
                     break;
                 case OSYM_LOCAL_STATIC:
                 {
@@ -510,16 +510,16 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                     vsym =
                         (ObjSym*)((genptr)vsymHdr + sym->u.localStatic.symOff);
 
-                    printf(useDecimal ? "local static at %04x, type "
-                                      : "local static at %d, type ",
+                    gprintf(useDecimal ? "local static at %04x, type "
+                                       : "local static at %d, type ",
                         vsym->u.variable.address);
                     PrintType(file, vsymHdr->types, vsym->u.variable.type);
-                    printf("\n");
+                    gprintf("\n");
                     VMUnlock(file, sym->u.localStatic.symBlock);
                     break;
                 }
                 case OSYM_NEWMINOR:
-                    printf("new minor protocol #%d\n", sym->u.newMinor.number);
+                    gprintf("new minor protocol #%d\n", sym->u.newMinor.number);
                     break;
                 case OSYM_PROFILE_MARK:
                 {
@@ -528,20 +528,20 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
                     if (sym->u.profMark.markType <
                         sizeof(markTypes) / sizeof(markTypes[0]))
                     {
-                        printf("%s profile mark at %04x\n",
+                        gprintf("%s profile mark at %04x\n",
                             markTypes[sym->u.profMark.markType],
                             sym->u.profMark.address);
                     }
                     else
                     {
-                        printf("%d-type profile mark at %04x\n",
+                        gprintf("%d-type profile mark at %04x\n",
                             sym->u.profMark.markType,
                             sym->u.profMark.address);
                     }
                     break;
                 }
                 default:
-                    printf("???\n");
+                    gprintf("???\n");
                     break;
             }
         }
@@ -580,8 +580,8 @@ void DumpRel(VMHandle file, VMBlockHandle block, ObjHeader* hdr)
             ID frame;
             ObjSym* sym;
 
-            printf(useDecimal ? "\t%s%s%s-sized %s relocation at %d:"
-                              : "\t%s%s%s-sized %s relocation at %04x:",
+            gprintf(useDecimal ? "\t%s%s%s-sized %s relocation at %d:"
+                               : "\t%s%s%s-sized %s relocation at %04x:",
                 rel->fixed ? "fixed, " : "",
                 rel->pcrel ? "pc-relative, " : "",
                 sizes[rel->size],
@@ -599,7 +599,7 @@ void DumpRel(VMHandle file, VMBlockHandle block, ObjHeader* hdr)
                 id = (ID)(rel->symBlock << (sizeof(unsigned short) * 8)) +
                      (rel->symOff);
 
-                printf("target = %i (published)\n", id);
+                gprintf("target = %i (published)\n", id);
                 continue;
             }
             else if (rel->frame >
@@ -614,19 +614,19 @@ void DumpRel(VMHandle file, VMBlockHandle block, ObjHeader* hdr)
 
             if (rel->symBlock == 0)
             {
-                printf("no symbol");
+                gprintf("no symbol");
             }
             else
             {
                 sym = (ObjSym*)((genptr)VMLock(file, rel->symBlock, NULL) +
                                 rel->symOff);
-                printf("target = %i", sym->name);
+                gprintf("target = %i", sym->name);
             }
-            printf(", frame = %i\n", frame);
+            gprintf(", frame = %i\n", frame);
         }
         if (debug)
         {
-            printf(
+            gprintf(
                 "\nsymOff = %d\nsymBlock = %d\noffset = %d\nframe = %d\ntype = "
                 "%d\n",
                 rel->symOff,
@@ -660,12 +660,12 @@ void DumpLines(VMHandle file, VMBlockHandle block)
         {
             hdr = (ObjLineHeader*)VMLock(file, oame->block, (MemHandle*)NULL);
 
-            printf(useDecimal ? "last offset = %d\n" : "last offset = %04x\n",
+            gprintf(useDecimal ? "last offset = %d\n" : "last offset = %04x\n",
                 oame->last);
             n = hdr->num;
 
             line = (ObjLine*)(hdr + 1);
-            printf("\tFile %i:\n", *(ID*)line);
+            gprintf("\tFile %i:\n", *(ID*)line);
             line++, n--;
 
             while (n > 0)
@@ -673,12 +673,12 @@ void DumpLines(VMHandle file, VMBlockHandle block)
                 if (line->line == 0)
                 {
                     line++;
-                    printf("\tFile %i:\n", *(ID*)line);
+                    gprintf("\tFile %i:\n", *(ID*)line);
                     line++;
                     n -= 2;
                 }
-                printf(useDecimal ? "\t\tline %4d at %d\n"
-                                  : "\t\tline %4d at %04x\n",
+                gprintf(useDecimal ? "\t\tline %4d at %d\n"
+                                   : "\t\tline %4d at %04x\n",
                     line->line,
                     line->offset);
                 n--, line++;
@@ -717,7 +717,7 @@ void DumpSourceMap(VMHandle file, VMBlockHandle header, ObjHeader* hdr)
                 ObjSrcMap* osm;
                 int i;
 
-                printf("\t%i: (^v%04x:%04x)\n",
+                gprintf("\t%i: (^v%04x:%04x)\n",
                     ohe->name,
                     ohe->block,
                     ohe->offset);
@@ -729,9 +729,9 @@ void DumpSourceMap(VMHandle file, VMBlockHandle header, ObjHeader* hdr)
                 {
                     if (osm->line != 0)
                     {
-                        printf(useDecimal
-                                   ? "\t\tline %4d is in %i, offset %d\n"
-                                   : "\t\tline %4d is in %i, offset %04x\n",
+                        gprintf(useDecimal
+                                    ? "\t\tline %4d is in %i, offset %d\n"
+                                    : "\t\tline %4d is in %i, offset %04x\n",
                             osm->line,
                             ((ObjSegment*)((genptr)hdr + osm->segment))->name,
                             osm->offset);
@@ -762,7 +762,7 @@ volatile void main(int argc, char** argv)
 
     if (argc < 2)
     {
-        fprintf(stderr,
+        fgprintf(stderr,
             "usage: printobj [-d] [-D] <symfile>\n"
             "\t-d\tprint values in decimal\n"
             "\t-D\tturn on debugging mode\n");
@@ -811,13 +811,13 @@ volatile void main(int argc, char** argv)
             obj_hash_chains = OBJ_HASH_CHAINS_NEW_FORMAT;
             break;
         default:
-            printf("invalid magic number (is %04x, s/b %04x)\n",
+            gprintf("invalid magic number (is %04x, s/b %04x)\n",
                 hdr->magic,
                 OBJMAGIC);
             exit(1);
     }
 
-    printf("protocol: %d.%d; revision: %d.%d.%d.%d\n",
+    gprintf("protocol: %d.%d; revision: %d.%d.%d.%d\n",
         hdr->proto.major,
         hdr->proto.minor,
         hdr->rev.major,
@@ -842,20 +842,20 @@ volatile void main(int argc, char** argv)
 
         if (hdr->entry.symBlock == 0)
         {
-            printf("no symbol");
+            gprintf("no symbol");
         }
         else
         {
             sym = (ObjSym*)((genptr)VMLock(output, hdr->entry.symBlock, NULL) +
                             hdr->entry.symOff);
-            printf("target = %i", sym->name);
+            gprintf("target = %i", sym->name);
         }
-        printf(", frame = %i\n", frame);
+        gprintf(", frame = %i\n", frame);
     }
 
     for (i = hdr->numSeg, seg = (ObjSegment*)(hdr + 1); i > 0; i--, seg++)
     {
-        printf(
+        gprintf(
             "%sSegment %d: name %i, class %i, type %s, alignment %#x, size "
             "%5d\n",
             i == hdr->numSeg ? "" : "\n=================\n",
@@ -867,18 +867,18 @@ volatile void main(int argc, char** argv)
             seg->size);
         if (seg->type == SEG_ABSOLUTE)
         {
-            printf("\tlocated at %04x:0\n", seg->data);
+            gprintf("\tlocated at %04x:0\n", seg->data);
         }
         else
         {
-            printf("*** DATA:\n");
+            gprintf("*** DATA:\n");
             DumpBlock(output, seg->data);
         }
-        printf("*** SYMBOLS:\n");
+        gprintf("*** SYMBOLS:\n");
         DumpSyms(output, seg->syms, (genptr)seg - (genptr)hdr);
-        printf("*** RELOCATIONS:\n");
+        gprintf("*** RELOCATIONS:\n");
         DumpRel(output, seg->relHead, hdr);
-        printf("*** LINES:\n");
+        gprintf("*** LINES:\n");
         DumpLines(output, seg->lines);
     }
     /*
@@ -890,7 +890,7 @@ volatile void main(int argc, char** argv)
      */
     if (hdr->srcMap != 0)
     {
-        printf("*** SOURCE FILE MAPPING:\n");
+        gprintf("*** SOURCE FILE MAPPING:\n");
         DumpSourceMap(output, hdr->srcMap, hdr);
     }
     VMClose(output);

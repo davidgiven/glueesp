@@ -32,12 +32,10 @@
  *	necessary that is.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: fixup.c,v 1.22 95/02/17 16:26:00 adam Exp $";
-#endif lint
 
 #include "esp.h"
-#include <objfmt.h>
+#include "objfmt.h"
+#include <search.h>
 
 typedef struct _Fixup
 {
@@ -182,15 +180,6 @@ void Fix_Register(FixClass class, /* Class of fixup */
     new->expr1 = expr1 ? Expr_Copy(expr1, FALSE) : NULL;
     new->expr2 = expr2 ? Expr_Copy(expr2, FALSE) : NULL;
     new->data = data;
-
-    if (new->expr1)
-    {
-        malloc_settag((void*)new->expr1, TAG_FIX_EXPR);
-    }
-    if (new->expr2)
-    {
-        malloc_settag((void*)new->expr2, TAG_FIX_EXPR);
-    }
 
     insque((struct qelem*)new, (struct qelem*)fix);
 }

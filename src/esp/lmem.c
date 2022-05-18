@@ -53,14 +53,10 @@
  *	address to be automatically adjusted when handles are inserted.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: lmem.c,v 3.10 93/02/12 18:47:58 adam Exp $";
-#endif lint
 
 #include "esp.h"
-#include <objfmt.h>
-#include <stddef.h>
-#include <lmem.h>
+#include "objfmt.h"
+#include "lmem.h"
 
 #define DEFAULT_ALIGN                                  \
     0xf /* Default to para alignment for compatibility \
@@ -192,7 +188,7 @@ FixResult LMemAddFreeSpace(int* dotPtr,
     Opaque data) /* Amount of free space desired */
 {
     byte b[2];
-    word freeSpace = (word)data;
+    word freeSpace = (word)(uintptr_t)data;
     byte* freeBlock;
     SymbolPtr pair = curSeg->u.segment.data->pair;
     dword freeOffset;
@@ -331,7 +327,7 @@ SymbolPtr LMem_CreateSegment(ID name)
      * Create the data segment first -- padded to a word boundary,
      * as all resource segments are.
      */
-    sprintf(segName, "%s@Data", nameStr);
+    sgprintf(segName, "%s@Data", nameStr);
 
     segID = ST_EnterNoLen(output, symStrings, segName);
     dataSeg = Sym_Enter(segID, SYM_SEGMENT, SEG_LMEM, lmem_Alignment, class);
@@ -340,7 +336,7 @@ SymbolPtr LMem_CreateSegment(ID name)
      * Now the heap segment (with the handle table and chunks) aligned to
      * a word boundary, as the handle table must be.
      */
-    sprintf(segName, "%s@Heap", nameStr);
+    sgprintf(segName, "%s@Heap", nameStr);
 
     segID = ST_EnterNoLen(output, symStrings, segName);
     heapSeg = Sym_Enter(segID, SYM_SEGMENT, SEG_LMEM, lmem_Alignment, class);
@@ -474,7 +470,7 @@ void LMem_InitSegment(SymbolPtr group, word segType, word flags, word freeSpace)
             2,
             NULL,
             NULL,
-            (Opaque)freeSpace);
+            (Opaque)(uintptr_t)freeSpace);
     }
     else
     {

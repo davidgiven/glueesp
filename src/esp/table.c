@@ -34,9 +34,6 @@
  *	XXX: Optimize for byte-sized elements?
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: table.c,v 1.12 92/06/30 12:47:49 jimmy Exp $";
-#endif lint
 
 #include "esp.h"
 #include "table.h"
@@ -89,14 +86,14 @@ static void TableVerify(TablePtr tp)
     TableChunk* tcp;
     int size;
 
-    assert(tp->numChunks <=
-           malloc_size((malloc_t)tp->chunks) / sizeof(TableChunk));
+    // assert(tp->numChunks <=
+    //        malloc_size((malloc_t)tp->chunks) / sizeof(TableChunk));
     assert(tp->numChunks >= 1);
 
     for (i = 0, size = 0, tcp = tp->chunks; i < tp->numChunks; i++, tcp++)
     {
         size += tcp->numElts;
-        assert(tcp->maxElts <= malloc_size(tcp->elts) / tp->eltSize);
+        // assert(tcp->maxElts <= malloc_size(tcp->elts) / tp->eltSize);
         assert(tcp->numElts <= tcp->maxElts);
     }
     assert(size == tp->tableSize);

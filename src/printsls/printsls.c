@@ -21,16 +21,12 @@
  *	Program to print out the contents of an object file.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: printobj.c,v 3.25 95/02/17 16:27:30 adam Exp $";
-#endif lint
 
-#include <config.h>
+#include "esp.h"
 
-#include <st.h>
-#include <objfmt.h>
-#include <objSwap.h>
-#include <stdio.h>
+#include "st.h"
+#include "objfmt.h"
+#include "objSwap.h"
 #include <ctype.h>
 
 int debug = 0;
@@ -82,14 +78,14 @@ void DumpSyms(
     MemHandle mem;
     VMBlockHandle next;
 
-    while (block != NULL)
+    while (block != NULLH)
     {
         hdr = (ObjSymHeader*)VMLock(file, block, &mem);
         MemInfo(mem, (genptr*)NULL, &size);
 
         if (hdr->seg != segOff)
         {
-            printf(
+            gprintf(
                 "************** WARNING: hdr->seg (%d) != segOff (%d) "
                 "************\n",
                 hdr->seg,
@@ -100,7 +96,7 @@ void DumpSyms(
 
         if (debug)
         {
-            printf("Block %04xh, %d symbols, types = %04xh\n",
+            gprintf("Block %04xh, %d symbols, types = %04xh\n",
                 block,
                 n,
                 hdr->types);
@@ -110,11 +106,11 @@ void DumpSyms(
             switch (sym->type)
             {
                 case OSYM_CLASS:
-                    printf(
+                    gprintf(
                         "%i %u %i\n", segName, sym->u.class.address, sym->name);
                     break;
                 case OSYM_PROC:
-                    printf(
+                    gprintf(
                         "%i %u %i\n", segName, sym->u.proc.address, sym->name);
                     break;
             }
@@ -139,7 +135,7 @@ volatile void main(int argc, char** argv)
 
     if (argc < 2)
     {
-        fprintf(stderr,
+        fgprintf(stderr,
             "usage: printsls [-d] [-D] <symfile>\n"
             "\t-d\tprint values in decimal\n"
             "\t-D\tturn on debugging mode\n");
@@ -188,13 +184,13 @@ volatile void main(int argc, char** argv)
             obj_hash_chains = OBJ_HASH_CHAINS_NEW_FORMAT;
             break;
         default:
-            printf("invalid magic number (is %04x, s/b %04x)\n",
+            gprintf("invalid magic number (is %04x, s/b %04x)\n",
                 hdr->magic,
                 OBJMAGIC);
             exit(1);
     }
 
-    printf("; protocol: %d.%d; revision: %d.%d.%d.%d\n",
+    gprintf("; protocol: %d.%d; revision: %d.%d.%d.%d\n",
         hdr->proto.major,
         hdr->proto.minor,
         hdr->rev.major,
@@ -219,35 +215,35 @@ volatile void main(int argc, char** argv)
 
         if (hdr->entry.symBlock == 0)
         {
-            // printf("no symbol");
+            // gprintf("no symbol");
         }
         else
         {
             sym = (ObjSym*)((genptr)VMLock(output, hdr->entry.symBlock, NULL) +
                             hdr->entry.symOff);
-            // printf("target = %i", sym->name);
+            // gprintf("target = %i", sym->name);
         }
-        // printf (", frame = %i\n", frame);
+        // gprintf (", frame = %i\n", frame);
     }
 
     for (i = hdr->numSeg, seg = (ObjSegment*)(hdr + 1); i > 0; i--, seg++)
     {
-        /*printf("%sSegment %d: name %i, class %i, type %s, alignment %#x, size
+        /*gprintf("%sSegment %d: name %i, class %i, type %s, alignment %#x, size
         %5d\n", i == hdr->numSeg ? "" : "\n=================\n",
                hdr->numSeg-i+1,
                seg->name, seg->class, segtypes[seg->type], seg->align,
                seg->size);
         if (seg->type == SEG_ABSOLUTE) {
-            printf("\tlocated at %04x:0\n", seg->data);
+            gprintf("\tlocated at %04x:0\n", seg->data);
         } else {
-            printf("*** DATA:\n");
+            gprintf("*** DATA:\n");
             DumpBlock(output, seg->data);
         }*/
-        // printf("*** SYMBOLS:\n");
+        // gprintf("*** SYMBOLS:\n");
         DumpSyms(output, seg->syms, seg->name, (genptr)seg - (genptr)hdr);
-        // printf("*** RELOCATIONS:\n");
+        // gprintf("*** RELOCATIONS:\n");
         // DumpRel(output, seg->relHead, hdr);
-        // printf("*** LINES:\n");
+        // gprintf("*** LINES:\n");
         // DumpLines(output, seg->lines);
     }
 

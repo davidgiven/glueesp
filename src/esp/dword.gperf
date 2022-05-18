@@ -1,0 +1,8 @@
+struct _OpCode
+%%
+.low,    LOWPART, 0, 
+.high,        HIGHPART, 0, 
+.chunk,OFFPART, 0, 
+.offset,          OFFPART, 0, 
+.handle,        SEGPART, 0, 
+.segment, SEGPART, 0,

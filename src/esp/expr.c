@@ -27,9 +27,6 @@
  *	XXX: Eventually, this will have to support external constants.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: expr.c,v 3.49 95/02/17 16:25:49 adam Exp $";
-#endif lint
 
 #include "esp.h"
 #include "expr.h"
@@ -249,7 +246,7 @@ Expr* Expr_Copy(Expr* expr, int usurp)
 {
     Expr* newExpr; /* New expression */
 
-    if (usurp && (malloc_size((char*)expr->elts) != 0))
+    if (usurp)
     {
         /*
          * We're allowed to usurp the elements in the old expression --
@@ -468,11 +465,11 @@ static int ExprExtractType(ExprResult* tos, /* Element to evaluate */
 {
     TypePtr result;
 
-    switch ((int)tos->type)
+    switch ((uintptr_t)tos->type)
     {
-        case (int)EXPR_TYPE_NAN:
+        case (uintptr_t)EXPR_TYPE_NAN:
             assert(0); /* should have been caught by caller */
-        case (int)EXPR_TYPE_CONST:
+        case (uintptr_t)EXPR_TYPE_CONST:
             /*
              * Deal with structure fields (typed constants...)
              */
@@ -481,17 +478,17 @@ static int ExprExtractType(ExprResult* tos, /* Element to evaluate */
                 result = (TypePtr)tos->rel.frame;
                 break;
             }
-        case (int)EXPR_TYPE_STRING:
-        case (int)NULL:
+        case (uintptr_t)EXPR_TYPE_STRING:
+        case (uintptr_t)NULL:
             /*
              * Constant -- Null type
              */
             result = NULL;
             break;
-        case (int)EXPR_TYPE_TYPE:
+        case (uintptr_t)EXPR_TYPE_TYPE:
             result = tos->data.type;
             break;
-        case (int)EXPR_TYPE_SYM:
+        case (uintptr_t)EXPR_TYPE_SYM:
             switch (tos->data.sym->type)
             {
                 case SYM_STRUCT:
@@ -561,7 +558,7 @@ static int ExprExtractType(ExprResult* tos, /* Element to evaluate */
                     return (0);
             }
             break;
-        case (int)EXPR_TYPE_SEGSYM: /* EXPR_SIZE relies on this... */
+        case (uintptr_t)EXPR_TYPE_SEGSYM: /* EXPR_SIZE relies on this... */
         default:
             /*
              * Use type in the result
@@ -606,14 +603,14 @@ static int ExprExtractSegReg(ExprResult* tos, /* Element to evaluate */
     byte modrm;
     int result;
 
-    switch ((int)tos->type)
+    switch ((uintptr_t)tos->type)
     {
-        case (int)EXPR_TYPE_NAN: /* Caller should handle this case */
-        case (int)EXPR_TYPE_CONST:
+        case (uintptr_t)EXPR_TYPE_NAN: /* Caller should handle this case */
+        case (uintptr_t)EXPR_TYPE_CONST:
             assert(0);
 
-        case (int)EXPR_TYPE_STRING:
-        case (int)EXPR_TYPE_SEGSYM:
+        case (uintptr_t)EXPR_TYPE_STRING:
+        case (uintptr_t)EXPR_TYPE_SEGSYM:
             return (0);
 
         default:
@@ -744,13 +741,13 @@ byte Expr_Status(ExprResult* result)
      * Figure if it's code-related, data-related, constant,
      * a register, uses direct addressing.
      */
-    switch ((int)result->type)
+    switch ((uintptr_t)result->type)
     {
-        case (int)EXPR_TYPE_NAN:
+        case (uintptr_t)EXPR_TYPE_NAN:
             value = 0;
             break;
-        case (int)EXPR_TYPE_CONST:
-        case (int)EXPR_TYPE_STRING:
+        case (uintptr_t)EXPR_TYPE_CONST:
+        case (uintptr_t)EXPR_TYPE_STRING:
             value |= EXPR_STAT_CONST;
             if (result->rel.sym)
             {
@@ -761,9 +758,9 @@ byte Expr_Status(ExprResult* result)
                 value |= EXPR_STAT_GLOBAL;
             }
             break;
-        case (int)EXPR_TYPE_SEGSYM:
+        case (uintptr_t)EXPR_TYPE_SEGSYM:
             break;
-        case (int)NULL:
+        case (uintptr_t)NULL:
             /*
              * See if it's a register (INDREG gives type NULL
              * too).
@@ -1677,7 +1674,7 @@ static int ExprRelOp(Expr* expr,
          */
         switch ((long)lhs->type)
         {
-            case (int)EXPR_TYPE_STRING:
+            case (uintptr_t)EXPR_TYPE_STRING:
                 if (rhs->type == EXPR_TYPE_STRING)
                 {
                     resval = (strcmp(lhs->data.str, rhs->data.str) == 0);
@@ -1688,7 +1685,7 @@ static int ExprRelOp(Expr* expr,
                     return (0);
                 }
                 /*FALLTHRU*/
-            case (int)EXPR_TYPE_CONST:
+            case (uintptr_t)EXPR_TYPE_CONST:
                 if (!ExprMangleString(expr, rhs, msgPtr, flags, statusPtr))
                 {
                     return (0);
@@ -1791,7 +1788,7 @@ static int ExprRelOp(Expr* expr,
          */
         switch ((long)lhs->type)
         {
-            case (int)EXPR_TYPE_STRING:
+            case (uintptr_t)EXPR_TYPE_STRING:
                 if (rhs->type == EXPR_TYPE_STRING)
                 {
                     resval = (strcmp(lhs->data.str, rhs->data.str) >= 0);
@@ -1802,7 +1799,7 @@ static int ExprRelOp(Expr* expr,
                     return (0);
                 }
                 /*FALLTHRU*/
-            case (int)EXPR_TYPE_CONST:
+            case (uintptr_t)EXPR_TYPE_CONST:
                 if (!ExprMangleString(expr, rhs, msgPtr, flags, statusPtr))
                 {
                     return (0);
@@ -1887,7 +1884,7 @@ static int ExprRelOp(Expr* expr,
          */
         switch ((long)lhs->type)
         {
-            case (int)EXPR_TYPE_STRING:
+            case (uintptr_t)EXPR_TYPE_STRING:
                 if (rhs->type == EXPR_TYPE_STRING)
                 {
                     resval = (strcmp(lhs->data.str, rhs->data.str) > 0);
@@ -1898,7 +1895,7 @@ static int ExprRelOp(Expr* expr,
                     return (0);
                 }
                 /*FALLTHRU*/
-            case (int)EXPR_TYPE_CONST:
+            case (uintptr_t)EXPR_TYPE_CONST:
                 if (!ExprMangleString(expr, rhs, msgPtr, flags, statusPtr))
                 {
                     return (0);
@@ -3639,12 +3636,12 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                 elt++, n--;
                 break;
             case EXPR_OFFSET:
-                switch ((int)tos->type)
+                switch ((uintptr_t)tos->type)
                 {
-                    case (int)EXPR_TYPE_NAN:
+                    case (uintptr_t)EXPR_TYPE_NAN:
                         /* result remains NaN */
                         break;
-                    case (int)EXPR_TYPE_CONST:
+                    case (uintptr_t)EXPR_TYPE_CONST:
                         if (tos->rel.frame)
                         {
                             /*
@@ -3655,9 +3652,9 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                              */
                             break;
                         }
-                    case (int)EXPR_TYPE_STRING:
-                    case (int)EXPR_TYPE_SEGSYM:
-                    case (int)NULL:
+                    case (uintptr_t)EXPR_TYPE_STRING:
+                    case (uintptr_t)EXPR_TYPE_SEGSYM:
+                    case (uintptr_t)NULL:
                         ExprError("invalid operand of OFFSET");
                     default:
                         if (tos->data.ea.modrm != 0x06)
@@ -3671,7 +3668,7 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                         tos->data.number = tos->data.ea.disp;
                         tos->type = EXPR_TYPE_CONST;
                         break;
-                    case (int)EXPR_TYPE_SYM:
+                    case (uintptr_t)EXPR_TYPE_SYM:
                         switch (tos->data.sym->type)
                         {
                             case SYM_BITFIELD:
@@ -3774,10 +3771,10 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                 tp = (void*)&(tos->type);
                 switch (*(long*)tp)
                 {
-                    case (int)EXPR_TYPE_NAN:
+                    case (uintptr_t)EXPR_TYPE_NAN:
                         /* result remains NaN */
                         break;
-                    case (int)EXPR_TYPE_CONST:
+                    case (uintptr_t)EXPR_TYPE_CONST:
                         if (elt->op == EXPR_HIGH)
                         {
                             tos->data.number >>= 8;
@@ -3812,7 +3809,7 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                         }
                         tos->data.number &= 0xff;
                         break;
-                    case (int)EXPR_TYPE_STRING:
+                    case (uintptr_t)EXPR_TYPE_STRING:
                         /*
                          * XXX: This ordering is weird, but it's what MASM
                          * does...
@@ -3851,7 +3848,7 @@ int Expr_Eval(Expr* expr, /* Expression to evaluate */
                             break;
                         }
                         /*FALLTHRU*/
-                    case (int)NULL:
+                    case (uintptr_t)NULL:
                     invalid_high_low_operand:
                         if (elt->op == EXPR_HIGH)
                         {

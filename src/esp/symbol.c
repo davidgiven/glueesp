@@ -68,13 +68,10 @@
  *	are placed in the "groups" array.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: symbol.c,v 3.32 94/03/30 17:57:18 jimmy Exp $";
-#endif lint
 
 #include "esp.h"
-#include <objfmt.h>
-/*#include    "scan.h"	;XXX */
+#include "objfmt.h"
+
 /*
  * Number of buckets in the symbol table
  */
@@ -780,11 +777,6 @@ SymbolPtr Sym_Enter(ID id, SymType type, ...)
                 sym->u.bitField.width = va_arg(args, int);
                 sym->u.bitField.value = va_arg(args, Expr*);
                 sym->u.bitField.type = va_arg(args, TypePtr);
-                if (sym->u.bitField.value)
-                {
-                    malloc_settag(
-                        (void*)sym->u.bitField.value, TAG_BITFIELD_VALUE);
-                }
 
                 if (old.type != SYM_LASTADDR && old.type != SYM_BITFIELD &&
                     old.type != SYM_NUMBER)
@@ -997,8 +989,6 @@ SymbolPtr Sym_Enter(ID id, SymType type, ...)
                 sym->u.field.type = va_arg(args, TypePtr);
                 sym->u.field.value = va_arg(args, Expr*);
 
-                malloc_settag((void*)sym->u.field.value, TAG_FIELD_VALUE);
-
                 /*
                  * Update the size of the containing structure based on
                  * the size of the field's type. Note this only happens if
@@ -1109,8 +1099,6 @@ SymbolPtr Sym_Enter(ID id, SymType type, ...)
                 sym->u.instvar.type = va_arg(args, TypePtr);
                 sym->u.instvar.value = va_arg(args, Expr*);
                 sym->u.instvar.offset = sType->u.sType.common.size;
-
-                malloc_settag((void*)sym->u.instvar.value, TAG_FIELD_VALUE);
 
                 /*
                  * Update the size of the containing structure based on
@@ -1270,7 +1258,6 @@ SymbolPtr Sym_Enter(ID id, SymType type, ...)
                     }
                 }
                 sym->u.equate.value = va_arg(args, Expr*);
-                malloc_settag((void*)sym->u.equate.value, TAG_EQUATE_EXPR);
                 sym->u.equate.rdonly = va_arg(args, int);
                 break;
             case SYM_ONSTACK:
@@ -1694,14 +1681,14 @@ int SAAO_Callback(SymbolPtr sym, Opaque data)
 {
     if (sym->u.localVar.offset >= 0)
     {
-        sym->u.localVar.offset += (int)data;
+        sym->u.localVar.offset += (uintptr_t)data;
     }
     return (0);
 }
 
 void Sym_AdjustArgOffset(SymbolPtr proc, int adjustment)
 {
-    Sym_ForEachLocal(proc, SAAO_Callback, (Opaque)adjustment);
+    Sym_ForEachLocal(proc, SAAO_Callback, (Opaque)(uintptr_t)adjustment);
 }
 
 /***********************************************************************
@@ -1993,7 +1980,7 @@ static inline void SymAllocSymBlock(SymWriteData* swd,
     }
 
     swd->prevSymH = (ObjSymHeader*)VMLock(output, syms, &swd->mem);
-    swd->prevSymH->next = (VMBlockHandle)NULL;
+    swd->prevSymH->next = NULLH;
     swd->prevSymH->types = swd->types;
     swd->prevSymH->seg = segOff;
     swd->prevSymH->num = (swd->symSize - sizeof(ObjSymHeader)) / sizeof(ObjSym);
@@ -2203,7 +2190,7 @@ static void SymWriteNonAddress(
      * Now run through the symbol table, looking for symbols for this
      * segment that haven't been written out yet.
      */
-    swdp->syms = NULL;
+    swdp->syms = NULLH;
     for (i = 0; i < SYM_BUCKETS; i++)
     {
         SymBucketPtr bucket;
@@ -2242,7 +2229,7 @@ static void SymWriteNonAddress(
                             osym.flags = sym->flags;
                             SymConvertType(
                                 sym->u.var.type, swdp, &osym.u.variable.type);
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2270,7 +2257,7 @@ static void SymWriteNonAddress(
                             osym.type = OSYM_LABEL;
                             osym.flags = sym->flags;
                             osym.u.label.near = sym->u.label.near;
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2297,7 +2284,7 @@ static void SymWriteNonAddress(
                             osym.name = SymPermanentName(sym);
                             osym.type = OSYM_PROTOMINOR;
                             osym.flags = sym->flags;
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2326,7 +2313,7 @@ static void SymWriteNonAddress(
                             osym.flags = sym->flags;
                             osym.u.proc.flags = sym->u.proc.flags;
                             osym.u.proc.local = 0;
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2376,7 +2363,7 @@ static void SymWriteNonAddress(
                                 OBJ_STORE_SID(osym.u.class.super, NullID);
                             }
 
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2405,7 +2392,7 @@ static void SymWriteNonAddress(
                             osym.flags = sym->flags;
                             SymConvertType(
                                 sym->u.chunk.type, swdp, &osym.u.chunk.type);
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2504,7 +2491,7 @@ static void SymWriteNonAddress(
                             osym.type = OSYM_CONST;
                             osym.flags = sym->flags;
 
-                            if (swdp->syms == NULL)
+                            if (swdp->syms == NULLH)
                             {
                                 SymAllocSymBlock(swdp, seg, segOff);
                             }
@@ -2528,7 +2515,7 @@ static void SymWriteNonAddress(
                         stype = ((sym->type == SYM_STRUCT) ? OSYM_STRUCT
                                                            : OSYM_UNION);
 
-                        if (swdp->syms == NULL)
+                        if (swdp->syms == NULLH)
                         {
                             SymAllocSymBlock(swdp, seg, segOff);
                         }
@@ -2631,7 +2618,7 @@ static void SymWriteNonAddress(
                         {
                             break;
                         }
-                        if (swdp->syms == NULL)
+                        if (swdp->syms == NULLH)
                         {
                             SymAllocSymBlock(swdp, seg, segOff);
                         }
@@ -2739,7 +2726,7 @@ static void SymWriteNonAddress(
                         {
                             break;
                         }
-                        if (swdp->syms == NULL)
+                        if (swdp->syms == NULLH)
                         {
                             SymAllocSymBlock(swdp, seg, segOff);
                         }
@@ -2878,7 +2865,7 @@ static void SymWriteNonAddress(
                         }
                         Sym_Reference(sym);
 
-                        if (swdp->syms == NULL)
+                        if (swdp->syms == NULLH)
                         {
                             SymAllocSymBlock(swdp, seg, segOff);
                         }
@@ -2911,7 +2898,7 @@ static void SymWriteNonAddress(
                  */
                 if (swdp->symOff == swdp->symSize)
                 {
-                    swdp->syms = NULL;
+                    swdp->syms = NULLH;
                 }
             }
         }
@@ -2981,16 +2968,16 @@ static int SymWriteSegment(SymbolPtr segSym, ObjSegment* seg)
     /*
      * Set up initial type description block.
      */
-    swd.tmem = NULL; /* So don't try to close non-existent block */
+    swd.tmem = NULLH; /* So don't try to close non-existent block */
     SymAllocTypeBlock(&swd);
 
     sym = segSym->u.segment.data->first;
 
     swd.prevSymH = (ObjSymHeader*)NULL;
-    swd.prevSyms = (VMBlockHandle)NULL;
+    swd.prevSyms = NULLH;
     prevLineH = (ObjLineHeader*)NULL;
 
-    swd.syms = lines = lineMap = (VMBlockHandle)NULL;
+    swd.syms = lines = lineMap = NULLH;
 
     lastRefOff = -1;
     file = NullID;
@@ -3180,7 +3167,7 @@ static int SymWriteSegment(SymbolPtr segSym, ObjSegment* seg)
              */
             swd.prevSymH =
                 (ObjSymHeader*)VMLock(output, swd.syms, (MemHandle*)&swd.mem);
-            swd.prevSymH->next = (VMBlockHandle)NULL;
+            swd.prevSymH->next = NULLH;
             swd.prevSymH->types = swd.types;
             swd.prevSymH->seg = segOff;
             swd.prevSymH->num =
@@ -3242,13 +3229,13 @@ static int SymWriteSegment(SymbolPtr segSym, ObjSegment* seg)
                      */
                     if (seg->size != 0)
                     {
-                        if (lines == NULL)
+                        if (lines == NULLH)
                         {
                             ObjAddrMapHeader* oamh;
                             ObjAddrMapEntry* oame;
                             MemHandle lmmem;
 
-                            if (lineMap == NULL)
+                            if (lineMap == NULLH)
                             {
                                 /*
                                  * Initializes to zero for us. right?
@@ -3985,7 +3972,7 @@ int Sym_ProcessSegments(void)
     }
 
     /* XXX
-        fprintf(stderr, "%d string equates using %d dynamic string blocks\n",
+        fgprintf(stderr, "%d string equates using %d dynamic string blocks\n",
                 stringEquates, stringBlocks);
     */
     VMUnlockDirty(output, map);

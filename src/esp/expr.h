@@ -269,13 +269,8 @@ typedef union
     int reg;       /* EXPR_REGISTER, EXPR_BYTEREG, EXPR_INDREG,
                     * EXPR_SEGREG */
     ID ident;      /* EXPR_IDENT value */
-#if defined _MSC_VER
-    char str[1]; /* MSC won't allow arrays of 0 length objects
-                  * so make this array 1 byte long because the union
-                  * will be the size of the largest member anyway */
-#else
-    char str[LABEL_IN_STRUCT]; /* EXPR_STRING start JAG */
-#endif
+    char str[1];   /* Make this array 1 byte long because the union
+                    * will be the size of the largest member anyway */
 } ExprElt;
 
 /*

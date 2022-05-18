@@ -33,11 +33,8 @@
  *	A grammar to parse code for the assembler.
  *
  ***********************************************************************/
-#ifndef lint
-static char *rcsid = "$Id: parse.y,v 3.73 95/09/20 14:46:15 weber Exp $";
-#endif lint
 
-#include    <config.h>
+#include    "config.h"
 
 #include    "esp.h"
 #include    "code.h"
@@ -52,19 +49,6 @@ static char *rcsid = "$Id: parse.y,v 3.73 95/09/20 14:46:15 weber Exp $";
 #include    <ctype.h>
 
 #define YYERROR_VERBOSE  /* Give the follow set in parse error messages */
-
-/*
- * Provide our own handler for the parser-stack overflow so the default one
- * that uses "alloca" isn't used, since alloca is forbidden to us owing to
- * the annoying hidden non-support of said function by our dearly beloved
- * HighC from MetaWare, A.M.D.G.
- */
-#define yyoverflow ParseStackOverflow
-#define YYLTYPE	byte	/* We don't use this, so minimize overhead */
-static void ParseStackOverflow(char *,
-			       short **, size_t,
-			       YYSTYPE **, size_t,
-			       int *);
 
 #include    <objfmt.h>
 /*
@@ -305,19 +289,19 @@ static struct {
 			 * for @CurSeg), we just copy the new value into the
 			 * block and alter the length */
 }	    predefs[] = {
-    "@CurSeg",	    NULL,
+    { "@CurSeg",	    NULL, },
 #define PD_CURSEG   	0
-    "@Cpu", 	    NULL,
+    { "@Cpu", 	    NULL, },
 #define PD_CPU	    	1
-    "@CurProc",	    NULL,
+    { "@CurProc",	    NULL, },
 #define PD_CURPROC  	2
-    "@FileName",    NULL,
+    { "@FileName",    NULL, },
 #define PD_FILENAME 	3
-    "@CurClass",    NULL,
+    { "@CurClass",    NULL, },
 #define PD_CURCLASS 	4
-    "@File",	    NULL,						    
+    { "@File",	    NULL, },
 #define PD_FILE	    	5
-    "@ArgSize",	    NULL,
+    { "@ArgSize",	    NULL, },
 #define PD_ARGSIZE  	6
 };
 
@@ -604,7 +588,7 @@ CheckExprRoom(int   numNeeded)
 	     * Use realloc to get more memory and possibly copy the stuff over
 	     */
 	    curExpr->elts =
-		(ExprElt *)realloc_tagged((char *)curExpr->elts,
+		(ExprElt *)realloc((char *)curExpr->elts,
 					  curExprSize * sizeof(ExprElt));
 	} else {
 	    /*
@@ -614,8 +598,7 @@ CheckExprRoom(int   numNeeded)
 	    ExprElt	*oldElts = curExpr->elts;
 	    
 	    curExpr->elts =
-		(ExprElt *)malloc_tagged(curExprSize * sizeof(ExprElt),
-					 TAG_EXPR_ELTS);
+		(ExprElt *)malloc(curExprSize * sizeof(ExprElt));
 	    bcopy(oldElts, curExpr->elts, curExpr->numElts * sizeof(ExprElt));
 	}
     }
@@ -966,7 +949,7 @@ StoreSubExpr(Expr   *expr)
  * This is now defined as union SemVal in scan.h, to avoid problems with
  * High C.
  *****************************************************************************/
-%pure_parser
+%define api.pure
 
 %token <model>	MEMMODEL
 %token <lang>	LANGUAGE
@@ -1008,7 +991,7 @@ StoreSubExpr(Expr   *expr)
 		MASK MASTER METHOD MOD MODEL
 		NE NEAR NORELOC NOTHING
 		OFFPART OFFSET ON_STACK ORG
-		PRIVATE PROCESSOR PROC PROTOMINOR PROTORESET PTR PUBLIC
+		PRIVATE PROC PROTOMINOR PROTORESET PTR PUBLIC
 		RECORD RELOC REPT RESID
 		SEG SEGMENT SEGREGOF SEGPART SIZE SIZESTR STATIC STRUC 
 		SUBSTR SUPER
@@ -1079,7 +1062,7 @@ StoreSubExpr(Expr   *expr)
  * 2 other s/r conflicts come from the def/defList definition. It does the
  *  right thing, and I've not the time to do it right.
  */
-%expect		3
+%expect		5
 
 %%
 /*
@@ -1210,7 +1193,7 @@ label		: IDENT ':'
 			/*
 			 * Form the name and enter it into the string table
 			 */
-			sprintf(name, "%d$", $1);
+			sgprintf(name, "%d$", $1);
 			id = ST_EnterNoLen(output, symStrings, name);
 			
 			/*
@@ -1550,7 +1533,7 @@ localID		: IDENT
 			yywarning("definition of %i as local variable shadows global symbol",
 				  $1->name);
 		    }
-		    $$ = $1->name
+		    $$ = $1->name;
 		}
 		| /* empty */ { $$ = NullID; }
 		| sym
@@ -1740,8 +1723,7 @@ labeled_op	: IDENT MACRO
 		    MBlk    *val;
 
 		    if (len > 0) {
-			val = (MBlk *)malloc_tagged(sizeof(MArg)+len,
-							 TAG_MBLK);
+			val = (MBlk *)malloc(sizeof(MArg)+len);
 
 			val->next = (MBlk *)NULL;
 			val->length = len;
@@ -1787,8 +1769,7 @@ strop		: SUBSTR STRING flexiComma cexpr
 			$$ = NULL;
 			yynerrs++;
 		    } else {
-			$$ = (MBlk *)malloc_tagged(sizeof(MArg)+(len-$4),
-						   TAG_MBLK);
+			$$ = (MBlk *)malloc(sizeof(MArg)+(len-$4));
 			$$->dynamic = TRUE;
 			$$->next = (MBlk *)NULL;
 			$$->length = len-$4;
@@ -1824,8 +1805,7 @@ strop		: SUBSTR STRING flexiComma cexpr
 			$$ = NULL;
 			yynerrs++;
 		    } else if ($6 > 0) {
-			$$ = (MBlk *)malloc_tagged(sizeof(MArg)+$6,
-						   TAG_MBLK);
+			$$ = (MBlk *)malloc(sizeof(MArg)+$6);
 			$$->dynamic = TRUE;
 			$$->next = (MBlk *)NULL;
 			$$->length = $6;
@@ -1852,8 +1832,7 @@ catstrargs	: STRING
 		    int	    len = strlen($1);
 
 		    if (len > 0) {
-			$$ = (MBlk *)malloc_tagged(sizeof(MArg)+len,
-						   TAG_MBLK);
+			$$ = (MBlk *)malloc(sizeof(MArg)+len);
 			$$->dynamic = TRUE;
 			$$->length = len;
 			$$->next = NULL;
@@ -1873,8 +1852,7 @@ catstrargs	: STRING
 		    int	    len = strlen($1);
 
 		    if (len > 0) {
-			$$ = (MBlk *)malloc_tagged(sizeof(MArg)+len,
-						   TAG_MBLK);
+			$$ = (MBlk *)malloc(sizeof(MArg)+len);
 			$$->dynamic = TRUE;
 			$$->length = len;
 			$$->next = $3;
@@ -1923,8 +1901,7 @@ macroArgList	: macroArg
 		;
 macroArg	: MACARG
 		{
-		    $$ = (Arg *)malloc_tagged(sizeof(Arg),
-					      TAG_MACRO_ARG);
+		    $$ = (Arg *)malloc(sizeof(Arg));
 		    $$->next = NULL;
 		    $$->value = $1;
 		    $$->freeIt = TRUE;
@@ -1934,13 +1911,12 @@ macroArg	: MACARG
 	 */
 		| '%' cexpr		
 		{
-		    $$ = (Arg *)malloc_tagged(sizeof(Arg),
-					      TAG_MACRO_ARG);
+		    $$ = (Arg *)malloc(sizeof(Arg));
 		    $$->next = 0;
-		    $$->value = (char *)malloc_tagged(12, TAG_MACRO_ARG_VALUE);
+		    $$->value = (char *)malloc(12);
 		    $$->freeIt = TRUE;
 
-		    sprintf($$->value, "%d", $2);
+		    sgprintf($$->value, "%d", $2);
 		    noSymTrans = TRUE;
 		    /*
 		     * If the look-ahead token is a newline, we do *not*
@@ -1957,13 +1933,12 @@ macroArg	: MACARG
 	 */
 		| '%' cexpr ','
 		{
-		    $$ = (Arg *)malloc_tagged(sizeof(Arg), TAG_MACRO_ARG);
+		    $$ = (Arg *)malloc(sizeof(Arg));
 		    $$->next = 0;
-		    $$->value = (char *)malloc_tagged(12,
-						      TAG_MACRO_ARG_VALUE);
+		    $$->value = (char *)malloc(12);
 		    $$->freeIt = TRUE;
 
-		    sprintf($$->value, "%d", $2);
+		    sgprintf($$->value, "%d", $2);
 		    noSymTrans = TRUE;
 		    /*
 		     * If the look-ahead token is a newline, we do *not*
@@ -2081,7 +2056,6 @@ numstrop    	: SIZESTR STRING
 		    free($2);
 
 		    $$ = Expr_Copy(&expr1, TRUE);
-		    malloc_settag((void *)$$, TAG_EQUATE_EXPR);
 		}
 		| INSTR operand1 flexiComma STRING
 		{
@@ -2104,7 +2078,6 @@ numstrop    	: SIZESTR STRING
 		    }
 
 		    $$ = Expr_Copy(&expr1, TRUE);
-		    malloc_settag((void *)$$, TAG_EQUATE_EXPR);
 		}
 		| INSTR operand1 flexiComma STRING flexiComma STRING
 		{
@@ -2167,7 +2140,6 @@ numstrop    	: SIZESTR STRING
 		    free($6);
 
 		    $$ = Expr_Copy(&expr1, TRUE);
-		    malloc_settag((void *)$$, TAG_EQUATE_EXPR);
 		}
 		;
 		
@@ -3795,7 +3767,7 @@ operand		: DWORDREG
 		    char    	buf[20];
 		    SymbolPtr	sym;
 
-		    sprintf(buf, "%d$", $1);
+		    sgprintf(buf, "%d$", $1);
 		    id = ST_EnterNoLen(output, symStrings, buf);
 		    sym = Sym_Find(id, SYM_LOCALLABEL, FALSE);
 		    if (sym != NULL) {
@@ -4925,7 +4897,7 @@ protoMinorSym   : PROTOMINOR_SYM
 			    char    	name[25];
 			    ID	    	bogusId;
 
-			    sprintf(name, "ProtoMinorSymbolSegment");
+			    sgprintf(name, "ProtoMinorSymbolSegment");
 			    bogusId = ST_EnterNoLen(output, symStrings, name);
 			    protoMinorSymbolSeg = Sym_Enter(bogusId,
 							    SYM_SEGMENT,
@@ -5443,7 +5415,6 @@ popOperandList	: popOperand
 popOperand	: operand1
 		{
 		    $$ = Expr_Copy(&expr1, TRUE);
-		    malloc_settag((void *)$$, TAG_POP_OPERAND);
 		}
 		;
 op		: PUSH pushOperandList {}
@@ -5636,7 +5607,7 @@ op		: SHLD operand1 flexiComma operand2 flexiComma CLorCexpr
 op		: DEBUG	    	    { lexdebug = yydebug = $1; }
 		| SHOWM	    	    { showmacro = $1; }
 		| MASM	    	    { masmCompatible = $1; }
-		| BREAK 	    { _asm int 3; }
+		| BREAK 	    { yyerror("break"); }
 		| FALLTHRU	    { fall_thru = 1; }
 		| FALLTHRU operand1
 		{
@@ -5662,17 +5633,17 @@ op		: DEBUG	    	    { lexdebug = yydebug = $1; }
 		| PROCESSOR
 		{
 		    procType &= ~PROC_MASK; procType |= $1;
-		    sprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
+		    sgprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
 		}
 		| COPROCESSOR
 		{
 		    procType &= ~PROC_CO_MASK; procType |= $1;
-		    sprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
+		    sgprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
 		}
 		| IOENABLE
 		{
 		    procType |= PROC_IO;
-		    sprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
+		    sgprintf(predefs[PD_CPU].value->text, "0x%04x", procType);
 		}
 		| ASSERT operand1 
 		{
@@ -6222,59 +6193,6 @@ op	    	: ERR  	       	{ yyerror(".ERR encountered"); yynerrs++;}
 
 
 /***********************************************************************
- *				ParseStackOverflow
- ***********************************************************************
- * SYNOPSIS:	  Enlarge the parser's internal stacks.
- * CALLED BY:	  yyparse()
- * RETURN:	  Nothing. *maxDepth left unaltered if we don't want to
- *		  allow the increase. yyerror is called with msg if so.
- * SIDE EFFECTS:  
- *
- * STRATEGY:	  This implementation relies on the "errcheck" rule
- *		  freeing stacks up, if necessary. Sadly, there's no
- *		  opportunity to do this, so it be a core leak...
- *
- * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/31/88		Initial Revision
- *
- ***********************************************************************/
-static void
-ParseStackOverflow(char		*msg,	    /* Message if we decide not to */
-		   short	**state,    /* Current state stack */
-		   size_t	stateSize,  /* Current state stack size */
-		   YYSTYPE	**vals,	    /* Current value stack */
-		   size_t	valsSize,   /* Current value stack size */
-		   int		*maxDepth)  /* Current maximum stack depth of
-					     * all stacks */
-{
-    *maxDepth *= 2;
-
-    if (malloc_size(*state) != 0) {
-	/*
-	 * we've been called before. Just use realloc()
-	 */
-	*state = (short *)realloc_tagged((char *)*state, stateSize * 2);
-	*vals = (YYSTYPE *)realloc_tagged((char *)*vals, valsSize * 2);
-    } else {
-	short	*newstate;
-	YYSTYPE	*newvals;
-
-	newstate = (short *)malloc_tagged(stateSize * 2,
-					  TAG_PARSER_STACK);
-	newvals = (YYSTYPE *)malloc_tagged(valsSize * 2,
-					   TAG_PARSER_STACK);
-
-	bcopy(*state, newstate, stateSize);
-	bcopy(*vals, newvals, valsSize);
-
-	*state = newstate;
-	*vals = newvals;
-    }
-}
-
-/***********************************************************************
  *				yyerror
  ***********************************************************************
  * SYNOPSIS:	  Print an error message with the current line #
@@ -6608,7 +6526,7 @@ AddArg(ID   	name,	    /* Argument name */
     
     argOffset += size;
     
-    sprintf(predefs[PD_ARGSIZE].value->text, "%d", argOffset - argBase);
+    sgprintf(predefs[PD_ARGSIZE].value->text, "%d", argOffset - argBase);
     predefs[PD_ARGSIZE].value->length = strlen(predefs[PD_ARGSIZE].value->text);
 
     curProc->u.proc.flags |= SYM_NO_JMP;
@@ -6984,7 +6902,7 @@ Parse_Init(SymbolPtr	global)
     /*
      * Setup the initial @Cpu...
      */
-    sprintf(predefs[PD_CPU].value->text, "0%04xh", procType);
+    sgprintf(predefs[PD_CPU].value->text, "0%04xh", procType);
     predefs[PD_CPU].value->length = strlen(predefs[PD_CPU].value->text);
 
     /*
@@ -7193,7 +7111,7 @@ Parse_CheckClosure(int *okPtr,
 	    Notify(NOTIFY_ERROR, curFile->name, -1,
 		   "Open segments:\n\t%i", curSeg->name);
 	    for (seg = segStack; seg != curFile->segstack; seg = seg->next) {
-		fprintf(stderr, "\t%i\n", seg->seg->name);
+		fgprintf(stderr, "\t%i\n", seg->seg->name);
 	    }
 	    retval = 1;
 	    *okPtr = 0;
@@ -7816,7 +7734,7 @@ ParseAdjustLocals(SymbolPtr	sym,
 	/*
 	 * Offset < 0 => it's local, so adjust it.
 	 */
-	sym->u.localVar.offset += (int)data;
+	sym->u.localVar.offset += (int)(uintptr_t)data;
     }
     return(0);
 }
@@ -7963,13 +7881,13 @@ Parse_LastChunkWarning (char *fmt, ...)
 	va_start(args,fmt);
 
 #if defined(unix) || defined(_WIN32)
-	fprintf(stderr, "file %s, line %d: Warning: ", 
+	fgprintf(stderr, "file %s, line %d: Warning: ", 
 		lastChunkFile, lastChunkLine);
 #else
-	fprintf(stderr, "Warning %s %d: ",
+	fgprintf(stderr, "Warning %s %d: ",
 		lastChunkFile, lastChunkLine);
 #endif
-	vfprintf(stderr, fmt, args);
+	vfgprintf(stderr, fmt, args);
 
 	va_end(args);
 
@@ -8003,7 +7921,7 @@ ParseSetLastChunkWarningInfo (void)
 	lastChunkLine = yylineno;
 
 	/* Set the file name */
-	sprintf(lastChunkFile, "%i", curFile->name);
+	sgprintf(lastChunkFile, "%i", curFile->name);
     }
 }	/* End of ParseSetLastChunkWarningInfo.	*/
 
