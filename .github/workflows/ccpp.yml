@@ -1,0 +1,16 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: apt update
+      run: sudo apt update
+    - name: apt
+      run: sudo apt install gperf bazel-bootstrap bison
+    - name: make
+      run: make
+
