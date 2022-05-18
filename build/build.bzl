@@ -14,7 +14,7 @@ def gperf(name, src, hash_function_name="hash", lookup_function_name="name"):
         name = name,
         srcs = [src],
         outs = [HFILE],
-        cmd = "gperf -i1 -o -j1 -E --constants-prefix={} -H{} -N{} -DptlC -k1-3 --output-file=$@ $<".format(
+        cmd = "gperf -o -E --constants-prefix={} -H{} -N{} -DptlC --output-file=$@ $<".format(
             name, hash_function_name, lookup_function_name)
     )
 

@@ -1,17 +1,18 @@
-struct _OpCode
+OpCode
 %%
-page,        ALIGNMENT, 255, 
-dword,            ALIGNMENT, 3, 
-public,COMBINE, SEG_PUBLIC, 
-private,              COMBINE, SEG_PRIVATE, 
-para,   ALIGNMENT, 15, 
-resource,     COMBINE, SEG_RESOURCE, 
-byte,            ALIGNMENT, 0, 
-word,  ALIGNMENT, 1, 
-common,              COMBINE, SEG_COMMON, 
+at, AT, 0, 
+byte, ALIGNMENT, 0, 
+common, COMBINE, SEG_COMMON, 
+dword, ALIGNMENT, 3, 
 library, COMBINE, SEG_LIBRARY, 
-lmem,        LMEM, 0, 
-at,            AT, 0, 
-nothing,   NOTHING, 0, 
-stack,              COMBINE, SEG_STACK,
+lmem, LMEM, 0, 
+nothing, NOTHING, 0, 
+page, ALIGNMENT, 255, 
+para, ALIGNMENT, 15, 
+private, COMBINE, SEG_PRIVATE, 
+public, COMBINE, SEG_PUBLIC, 
+resource, COMBINE, SEG_RESOURCE, 
+stack, COMBINE, SEG_STACK, 
+word, ALIGNMENT, 1, 
+%%
 
