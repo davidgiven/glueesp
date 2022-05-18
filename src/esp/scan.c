@@ -1,31 +1,31 @@
 
 /***********************************************************************
- * PROJECT:	  PCGEOS
- * MODULE:	  Esp -- lexical analyzer
- * FILE:	  scan.c
+ * PROJECT:       PCGEOS
+ * MODULE:        Esp -- lexical analyzer
+ * FILE:          scan.c
  *
- * AUTHOR:  	  Adam de Boor: Mar  6, 1989
+ * AUTHOR:        Adam de Boor: Mar  6, 1989
  *
  * ROUTINES:
- *	Name	  	    Description
- *	----	  	    -----------
- *	yystdlex  	    Scan off a token from the current input
- *			    and return it
- *	yystartmacro	    Begin the processing of a macro call
- *	yyreadmacro	    Read a macro definition (INTERNAL)
- *	Scan_Init 	    Initialization function
- *	yyflush	  	    Flush to the end of the current line
- *	yyrepeat  	    Execute a REPT directive
- *	yyirp		    Execute an IRP directive
- *	yyirpc		    Execute an IRPC directive
+ *      Name                Description
+ *      ----                -----------
+ *      yystdlex            Scan off a token from the current input
+ *                              and return it
+ *      yystartmacro    Begin the processing of a macro call
+ *      yyreadmacro         Read a macro definition (INTERNAL)
+ *      Scan_Init           Initialization function
+ *      yyflush             Flush to the end of the current line
+ *      yyrepeat            Execute a REPT directive
+ *      yyirp               Execute an IRP directive
+ *      yyirpc              Execute an IRPC directive
  *
  * REVISION HISTORY:
- *	Date	  Name	    Description
- *	----	  ----	    -----------
- *	9/ 2/88	  ardeb	    Initial version
+ *      Date      Name      Description
+ *      ----      ----      -----------
+ *      9/ 2/88   ardeb     Initial version
  *
  * DESCRIPTION:
- *	Lexical analyzer for Esp. Taken mostly from the scanner for Asap.
+ *      Lexical analyzer for Esp. Taken mostly from the scanner for Asap.
  *
  ***********************************************************************/
 
@@ -123,263 +123,41 @@ static ID lineID;            /* ID for recognizing @Line */
 #define T 4 /* macro argument terminator */
 #define E 8 /* end-of-line character */
 static const unsigned char cbits[] = {
+    // clang-format off
     N, /* EOF */
-    T,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /*  0 -  7 */
-    N,
-    T,
-    T | E,
-    N,
-    N,
-    T | E,
-    N,
-    N, /*  8 - 15 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 16 - 23 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 24 - 31 */
-    T,
-    N,
-    N,
-    N,
-    B,
-    N,
-    N,
-    N, /* sp ! " # $ % & ' */
-    N,
-    N,
-    N,
-    N,
-    T,
-    N,
-    N,
-    N, /* (  ) * + , - . / */
-    O,
-    O,
-    O,
-    O,
-    O,
-    O,
-    O,
-    O, /* 0  1 2 3 4 5 6 7 */
-    O,
-    O,
-    N,
-    T,
-    N,
-    N,
-    N,
-    B, /* 8  9 : ; < = > ? */
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* @  A B C D E F G */
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* H  I J K L M N O */
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* P  Q R S T U V W */
-    B,
-    B,
-    B,
-    N,
-    N,
-    N,
-    N,
-    B, /* X  Y Z [ \ ] ^ _ */
-    N,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* `  a b c d e f g */
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* h  i j k l m n o */
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B,
-    B, /* p  q r s t u v w */
-    B,
-    B,
-    B,
-    N,
-    N,
-    N,
-    N,
-    N, /* x  y z { | } ~ del */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 128 - 135 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 136 - 143 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 144 - 151 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 152 - 159 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 160 - 167 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 168 - 175 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 176 - 183 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 184 - 191 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 192 - 199 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 200 - 207 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 208 - 215 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 216 - 223 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 224 - 231 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 232 - 239 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 240 - 247 */
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N,
-    N, /* 248 - 255 */
+    T, N, N,     N, N, N,     N, N, /*  0 -  7 */
+    N, T, T | E, N, N, T | E, N, N, /*  8 - 15 */
+    N, N, N,     N, N, N,     N, N, /* 16 - 23 */
+    N, N, N,     N, N, N,     N, N, /* 24 - 31 */
+    T, N, N,     N, B, N,     N, N, /* sp ! " # $ % & ' */
+    N, N, N,     N, T, N,     N, N, /* (  ) * + , - . / */
+    O, O, O,     O, O, O,     O, O, /* 0  1 2 3 4 5 6 7 */
+    O, O, N,     T, N, N,     N, B, /* 8  9 : ; < = > ? */
+    B, B, B,     B, B, B,     B, B, /* @  A B C D E F G */
+    B, B, B,     B, B, B,     B, B, /* H  I J K L M N O */
+    B, B, B,     B, B, B,     B, B, /* P  Q R S T U V W */
+    B, B, B,     N, N, N,     N, B, /* X  Y Z [ \ ] ^ _ */
+    N, B, B,     B, B, B,     B, B, /* `  a b c d e f g */
+    B, B, B,     B, B, B,     B, B, /* h  i j k l m n o */
+    B, B, B,     B, B, B,     B, B, /* p  q r s t u v w */
+    B, B, B,     N, N, N,     N, N, /* x  y z { | } ~ del */
+    N, N, N,     N, N, N,     N, N, /* 128 - 135 */
+    N, N, N,     N, N, N,     N, N, /* 136 - 143 */
+    N, N, N,     N, N, N,     N, N, /* 144 - 151 */
+    N, N, N,     N, N, N,     N, N, /* 152 - 159 */
+    N, N, N,     N, N, N,     N, N, /* 160 - 167 */
+    N, N, N,     N, N, N,     N, N, /* 168 - 175 */
+    N, N, N,     N, N, N,     N, N, /* 176 - 183 */
+    N, N, N,     N, N, N,     N, N, /* 184 - 191 */
+    N, N, N,     N, N, N,     N, N, /* 192 - 199 */
+    N, N, N,     N, N, N,     N, N, /* 200 - 207 */
+    N, N, N,     N, N, N,     N, N, /* 208 - 215 */
+    N, N, N,     N, N, N,     N, N, /* 216 - 223 */
+    N, N, N,     N, N, N,     N, N, /* 224 - 231 */
+    N, N, N,     N, N, N,     N, N, /* 232 - 239 */
+    N, N, N,     N, N, N,     N, N, /* 240 - 247 */
+    N, N, N,     N, N, N,     N, N, /* 248 - 255 */
+    // clang-format on
 };
 
 #define isfirstid(c) ((cbits + 1)[(uint8_t)(c)] & F)
@@ -394,7 +172,6 @@ static char input(void);
 static char stdinput(void);
 static int yyreadstring(char open, char close, char duplicate, YYSTYPE*);
 static int ustrcmp(char* s1, char* s2);
-static char* newstr(char*);
 static void yyfreemaps(void);
 static void yyreadmacro(YYSTYPE* yylval);
 
@@ -451,19 +228,19 @@ static MacState* macros = (MacState*)NULL;
 static MacState* freeState = (MacState*)NULL;
 
 /***********************************************************************
- *				yynewline
+ *                              yynewline
  ***********************************************************************
- * SYNOPSIS:	    Begin a newline
- * CALLED BY:	    yystdlex, yymacarglex
- * RETURN:	    nothing
+ * SYNOPSIS:        Begin a newline
+ * CALLED BY:       yystdlex, yymacarglex
+ * RETURN:          nothing
  * SIDE EFFECTS:    a SYM_LINE symbol is entered for the current file.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/29/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/29/89         Initial Revision
  *
  ***********************************************************************/
 void yynewline(void)
@@ -501,25 +278,25 @@ void yynewline(void)
 }
 
 /***********************************************************************
- *				NewBlock
+ *                              NewBlock
  ***********************************************************************
- * SYNOPSIS:	    Return a new macro block
- * CALLED BY:	    yyreadmacro, yylex, ...
- * RETURN:	    Pointer to a new block
+ * SYNOPSIS:        Return a new macro block
+ * CALLED BY:       yyreadmacro, yylex, ...
+ * RETURN:          Pointer to a new block
  * SIDE EFFECTS:    Another chunk of blocks may be allocated.
- *	    	    The length and next fields of the returned block
- *	    	    are initialized to 0.
+ *                  The length and next fields of the returned block
+ *                  are initialized to 0.
  *
  * STRATEGY:
- *	Since macro blocks are never freed, but are allocated fairly
- *	frequently, to avoid excessive overhead, both speedwise and
- *	memorywise, we allocate them in groups of...NUM_MACRO_BLOCKS
- *	internally to this function.
+ *      Since macro blocks are never freed, but are allocated fairly
+ *      frequently, to avoid excessive overhead, both speedwise and
+ *      memorywise, we allocate them in groups of...NUM_MACRO_BLOCKS
+ *      internally to this function.
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	3/15/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   3/15/89         Initial Revision
  *
  ***********************************************************************/
 static MBlk* NewBlock(void)
@@ -542,25 +319,25 @@ static MBlk* NewBlock(void)
 }
 
 /***********************************************************************
- *				PushMacro
+ *                              PushMacro
  ***********************************************************************
- * SYNOPSIS:	  Push the current macro state for later recovery
- * CALLED BY:	  yylex, yystartmacro
- * RETURN:	  Nothing
+ * SYNOPSIS:      Push the current macro state for later recovery
+ * CALLED BY:     yylex, yystartmacro
+ * RETURN:        Nothing
  * SIDE EFFECTS:  curBlock is set to newBlock with curMacPtr and
- *	    	  curMacCount updated accordingly. In addition, numMaps
- *	    	  is zeroed.
- *	    	  macros also points to the previous state, which has
- *	    	  been pushed.
- *		  All characters pushed-back are saved with the state
- *	    	  and the push-back buffer cleared.
+ *                curMacCount updated accordingly. In addition, numMaps
+ *                is zeroed.
+ *                macros also points to the previous state, which has
+ *                been pushed.
+ *                All characters pushed-back are saved with the state
+ *                and the push-back buffer cleared.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 2/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 2/88         Initial Revision
  *
  ***********************************************************************/
 static void PushMacro(MBlk* newBlock) /* New block to read */
@@ -631,7 +408,7 @@ static void PushMacro(MBlk* newBlock) /* New block to read */
      * different source of input (a macro). When we're done with the
      * macro, we'll go back to the other source. This deals with things
      * like:
-     *	    DBItemInfo <strequate,>
+     *      DBItemInfo <strequate,>
      * What used to happen is we'd scan off the strequate, discover it's
      * a string equate and push to its value, leaving yyinput alone. The
      * next call to input would return an EOF (q.v. data.c) and we'd get
@@ -642,19 +419,19 @@ static void PushMacro(MBlk* newBlock) /* New block to read */
 }
 
 /***********************************************************************
- *				PopMacro
+ *                              PopMacro
  ***********************************************************************
- * SYNOPSIS:	  Restore the most recent macro.
- * CALLED BY:	  input
- * RETURN:	  Nothing
+ * SYNOPSIS:      Restore the most recent macro.
+ * CALLED BY:     input
+ * RETURN:        Nothing
  * SIDE EFFECTS:  The previous state (see PushMacro above) is restored.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 2/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 2/88         Initial Revision
  *
  ***********************************************************************/
 static void PopMacro(void)
@@ -789,19 +566,19 @@ static void PopMacro(void)
 }
 
 /***********************************************************************
- *				Scan_SavePB
+ *                              Scan_SavePB
  ***********************************************************************
- * SYNOPSIS:	    Save current input parameters/pushback
- * CALLED BY:	    Something before changing yyinput()
- * RETURN:	    Nothing
+ * SYNOPSIS:        Save current input parameters/pushback
+ * CALLED BY:       Something before changing yyinput()
+ * RETURN:          Nothing
  * SIDE EFFECTS:    Macro state is pushed
  *
- * STRATEGY:	    Just call PushMacro(NULL);
+ * STRATEGY:        Just call PushMacro(NULL);
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	5/ 1/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   5/ 1/89         Initial Revision
  *
  ***********************************************************************/
 void Scan_SavePB(void)
@@ -814,19 +591,19 @@ void Scan_SavePB(void)
 }
 
 /***********************************************************************
- *				Scan_RestorePB
+ *                              Scan_RestorePB
  ***********************************************************************
- * SYNOPSIS:	    Recover pushback characters from previous level
- * CALLED BY:	    Something after restoring yyinput
- * RETURN:	    Nothing
+ * SYNOPSIS:        Recover pushback characters from previous level
+ * CALLED BY:       Something after restoring yyinput
+ * RETURN:          Nothing
  * SIDE EFFECTS:    Macro state is popped
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	5/ 1/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   5/ 1/89         Initial Revision
  *
  ***********************************************************************/
 void Scan_RestorePB(void)
@@ -835,30 +612,30 @@ void Scan_RestorePB(void)
 }
 
 /***********************************************************************
- *				stdinput
+ *                              stdinput
  ***********************************************************************
- * SYNOPSIS:	Standard input function to read from current macro
- *	    	or file.
- * CALLED BY:	input
- * RETURN:	character read
+ * SYNOPSIS:    Standard input function to read from current macro
+ *              or file.
+ * CALLED BY:   input
+ * RETURN:      character read
  * SIDE EFFECTS:curBlock, curMacCount, curMacPtr may change
  *
  * STRATEGY:
- *	If in a macro,
- *	    If no characters left,
- *	        fetch the next block.
- *		if next block is an argument, push to the argument text,
- *		    if it exists, and drop through to read its first char
- *		if the argument text is empty (its pointer is null), just
- *		    advance to the next block and try again.
- *	    Fetch the next character from the macro block and return it.
- *	Else read a character from the input file. If the character is EOF,
- *	    return 0 (holdover from when this was done using lex)
+ *      If in a macro,
+ *          If no characters left,
+ *              fetch the next block.
+ *              if next block is an argument, push to the argument text,
+ *                  if it exists, and drop through to read its first char
+ *              if the argument text is empty (its pointer is null), just
+ *                  advance to the next block and try again.
+ *          Fetch the next character from the macro block and return it.
+ *      Else read a character from the input file. If the character is EOF,
+ *          return 0 (holdover from when this was done using lex)
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	4/ 3/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   4/ 3/89         Initial Revision
  *
  ***********************************************************************/
 static char stdinput(void)
@@ -973,22 +750,22 @@ static char stdinput(void)
 }
 
 /***********************************************************************
- *				input
+ *                              input
  ***********************************************************************
- * SYNOPSIS:	  Read the next character of input
- * CALLED BY:	  yystdlex, yyreadmacro, yreadmacrobody, yyflush
- * RETURN:	  the next character or 0 if hit EOF
+ * SYNOPSIS:      Read the next character of input
+ * CALLED BY:     yystdlex, yyreadmacro, yreadmacrobody, yyflush
+ * RETURN:        the next character or 0 if hit EOF
  * SIDE EFFECTS:  pushback pointer will be altered if char read from there
  *
  * STRATEGY:
- *	If any characters pushed back,
- *	    pop the stack and return the top character.
- *	Else call yyinput to fetch character
+ *      If any characters pushed back,
+ *          pop the stack and return the top character.
+ *      Else call yyinput to fetch character
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/25/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/25/88         Initial Revision
  *
  ***********************************************************************/
 static char input(void)
@@ -1011,25 +788,25 @@ static char input(void)
 }
 
 /***********************************************************************
- *				NextID
+ *                              NextID
  ***********************************************************************
- * SYNOPSIS:	    Read the next identifier from the input stream,
- *	    	    pushing all the characters back.
- * CALLED BY:	    yymacarglex, yystdlex
- * RETURN:	    TRUE if next token is an identifier (identifier
- *	    	    is in yytext), else FALSE and yytext is unchanged.
+ * SYNOPSIS:        Read the next identifier from the input stream,
+ *                  pushing all the characters back.
+ * CALLED BY:       yymacarglex, yystdlex
+ * RETURN:          TRUE if next token is an identifier (identifier
+ *                  is in yytext), else FALSE and yytext is unchanged.
  *
- *	    	    If pbPtr is non-NULL, yysptr before the identifer
- *	    	    was pushed back is stored there so the pushback
- *	    	    can be easily undone.
+ *                  If pbPtr is non-NULL, yysptr before the identifer
+ *                  was pushed back is stored there so the pushback
+ *                  can be easily undone.
  * SIDE EFFECTS:    ...
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	6/ 1/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   6/ 1/89         Initial Revision
  *
  ***********************************************************************/
 static int NextID(char** pbPtr) /* Place to store original pushback pointer
@@ -1158,23 +935,23 @@ static OpProc* opFuncs[MAX_OP_FUNCS];
 static int opfTop = -1;
 
 /***********************************************************************
- *				Scan_UseOpProc
+ *                              Scan_UseOpProc
  ***********************************************************************
- * SYNOPSIS:	    Register another opcode-search function to be used
- *	    	    when checking out an identifier.
- * CALLED BY:	    yystdlex and yyparse
- * RETURN:	    Index of entry (for removal)
+ * SYNOPSIS:        Register another opcode-search function to be used
+ *                  when checking out an identifier.
+ * CALLED BY:       yystdlex and yyparse
+ * RETURN:          Index of entry (for removal)
  * SIDE EFFECTS:    opfTop is incremented...
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/18/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/18/89         Initial Revision
  *
  ***********************************************************************/
-inline int Scan_UseOpProc(OpProc* proc)
+int Scan_UseOpProc(OpProc* proc)
 {
     assert(opfTop != MAX_OP_FUNCS);
     opFuncs[++opfTop] = proc;
@@ -1182,22 +959,22 @@ inline int Scan_UseOpProc(OpProc* proc)
 }
 
 /***********************************************************************
- *				Scan_DontUseOpProc
+ *                              Scan_DontUseOpProc
  ***********************************************************************
- * SYNOPSIS:	    Stop searching for opcodes with a procedure
- * CALLED BY:	    yystdlex and yyparse
+ * SYNOPSIS:        Stop searching for opcodes with a procedure
+ * CALLED BY:       yystdlex and yyparse
  * RETURN:
  * SIDE EFFECTS:
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/18/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/18/89         Initial Revision
  *
  ***********************************************************************/
-inline void Scan_DontUseOpProc(int idx)
+void Scan_DontUseOpProc(int idx)
 {
     if (idx != opfTop)
     {
@@ -1214,24 +991,24 @@ inline void Scan_DontUseOpProc(int idx)
 }
 
 /***********************************************************************
- *				isReserved
+ *                              isReserved
  ***********************************************************************
- * SYNOPSIS:	  See if a string is a reserved word
- * CALLED BY:	  yylex
- * RETURN:	  the OpCode pointer or NULL if not a reserved word
+ * SYNOPSIS:      See if a string is a reserved word
+ * CALLED BY:     yylex
+ * RETURN:        the OpCode pointer or NULL if not a reserved word
  * SIDE EFFECTS:  None.
  *
  * STRATEGY:
- *	Downcase the word and call findOpcode and/or findKeyword, depending
- *	on tryOpcode.
+ *      Downcase the word and call findOpcode and/or findKeyword, depending
+ *      on tryOpcode.
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	3/ 1/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   3/ 1/89         Initial Revision
  *
  ***********************************************************************/
-static inline const OpCode* isReserved(char* str, /* String to look up */
+static const OpCode* isReserved(char* str, /* String to look up */
     int len)                                      /* Length of same */
 {
     char buf[12]; /* Storage for downcased word */
@@ -1286,40 +1063,19 @@ static inline const OpCode* isReserved(char* str, /* String to look up */
 }
 
 /***********************************************************************
- *				newstr
+ *                              ScanEquateToString
  ***********************************************************************
- * SYNOPSIS:	  Create a copy of the given string
- * CALLED BY:	  yylex for IDENT and STRING
- * RETURN:	  a newly-allocate copy of the given string
- * SIDE EFFECTS:  Memory be allocated
- *
- * STRATEGY:
- *
- * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
- *
- ***********************************************************************/
-static inline char* newstr(char* str)
-{
-    return ((char*)strcpy((char*)malloc(strlen(str) + 1), str));
-}
-
-/***********************************************************************
- *				ScanEquateToString
- ***********************************************************************
- * SYNOPSIS:	    Convert a SYM_STRING to a real string
- * CALLED BY:	    yymacarglex (% of equate), yystdlex (ifidn, ifdif)
- * RETURN:	    The converted string, dynamically allocated
+ * SYNOPSIS:        Convert a SYM_STRING to a real string
+ * CALLED BY:       yymacarglex (% of equate), yystdlex (ifidn, ifdif)
+ * RETURN:          The converted string, dynamically allocated
  * SIDE EFFECTS:    None
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/89         Initial Revision
  *
  ***********************************************************************/
 static char* ScanEquateToString(SymbolPtr sym)
@@ -1347,20 +1103,20 @@ static char* ScanEquateToString(SymbolPtr sym)
 }
 
 /***********************************************************************
- *				yymacarglex
+ *                              yymacarglex
  ***********************************************************************
- * SYNOPSIS:	    Scan off another macro argument
- * CALLED BY:	    yyparse
- * RETURN:	    STRING or '\n' or '%'
+ * SYNOPSIS:        Scan off another macro argument
+ * CALLED BY:       yyparse
+ * RETURN:          STRING or '\n' or '%'
  * SIDE EFFECTS:    firstArg set FALSE. If '%' or '\n' seen, yylex is
- *	    	    set to yystdlex.
+ *                  set to yystdlex.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	4/ 3/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   4/ 3/89         Initial Revision
  *
  ***********************************************************************/
 int yymacarglex(YYSTYPE* yylval, ...)
@@ -1649,21 +1405,21 @@ again:
 }
 
 /***********************************************************************
- *				ScanEquate
+ *                              ScanEquate
  ***********************************************************************
- * SYNOPSIS:	    Scan off an equate of some sort
- * CALLED BY:	    yystdlex
- * RETURN:	    Nothing
+ * SYNOPSIS:        Scan off an equate of some sort
+ * CALLED BY:       yystdlex
+ * RETURN:          Nothing
  * SIDE EFFECTS:    yylval->block points to the head of the MBlk chain
- *	    	    scanned off (if string equate).
+ *                  scanned off (if string equate).
  *
  * STRATEGY:
  *      There are two types of equates in this system: numeric and string.
- *	A string equate is created by one of
+ *      A string equate is created by one of
  *      the following:
- *       	equ <string>
- *       	equ 'string'
- *       	equ "string"
+ *              equ <string>
+ *              equ 'string'
+ *              equ "string"
  *      in any of these cases, the string is scanned off into a
  *      chain of MBlk's and interpolated into the input by us
  *      at a later time. For '' and "" strings, the delimiters
@@ -1675,9 +1431,9 @@ again:
  *      is left to figure out the value.
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	6/ 5/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   6/ 5/89         Initial Revision
  *
  ***********************************************************************/
 static void ScanEquate(YYSTYPE* yylval)
@@ -1868,20 +1624,20 @@ static void ScanEquate(YYSTYPE* yylval)
 }
 
 /***********************************************************************
- *				ScanComment
+ *                              ScanComment
  ***********************************************************************
- * SYNOPSIS:	    Skip over a COMMENT block.
- * CALLED BY:	    yystdlex, Scan_ToEndif
- * RETURN:	    Nothing
+ * SYNOPSIS:        Skip over a COMMENT block.
+ * CALLED BY:       yystdlex, Scan_ToEndif
+ * RETURN:          Nothing
  * SIDE EFFECTS:    input stream is left at the line terminator after the
- *		    closing delimiter.
+ *                  closing delimiter.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	11/ 4/89	Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   11/ 4/89        Initial Revision
  *
  ***********************************************************************/
 static void ScanComment(void)
@@ -1958,19 +1714,19 @@ static void ScanComment(void)
 }
 
 /***********************************************************************
- *				ScanInclude
+ *                              ScanInclude
  ***********************************************************************
- * SYNOPSIS:	    Handle INCLUDE directive
- * CALLED BY:	    yystdlex
- * RETURN:	    Nothing
+ * SYNOPSIS:        Handle INCLUDE directive
+ * CALLED BY:       yystdlex
+ * RETURN:          Nothing
  * SIDE EFFECTS:    A new File is pushed onto the file stack.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	6/ 5/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   6/ 5/89         Initial Revision
  *
  ***********************************************************************/
 static void ScanInclude(void)
@@ -2166,20 +1922,20 @@ static void ScanInclude(void)
 }
 
 /***********************************************************************
- *				ScanStruct
+ *                              ScanStruct
  ***********************************************************************
- * SYNOPSIS:	    Read a structured-type initializer
- * CALLED BY:	    yylex (< if defStruct set)
- * RETURN:	    Token to return
+ * SYNOPSIS:        Read a structured-type initializer
+ * CALLED BY:       yylex (< if defStruct set)
+ * RETURN:          Token to return
  * SIDE EFFECTS:    yylval->string is set to the string read, dynamically
- *	    	    allocated.
+ *                  allocated.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	3/31/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   3/31/89         Initial Revision
  *
  ***********************************************************************/
 static int ScanStruct(YYSTYPE* yylval) /* Place to store result */
@@ -2397,19 +2153,19 @@ complete:
 }
 
 /***********************************************************************
- *				yystdlex
+ *                              yystdlex
  ***********************************************************************
- * SYNOPSIS:	  Scan a token out of the input stream and return it.
- * CALLED BY:	  yyparse, SkipToEndif (parse.c)
- * RETURN:	  the token and yylval set appropriately.
+ * SYNOPSIS:      Scan a token out of the input stream and return it.
+ * CALLED BY:     yyparse, SkipToEndif (parse.c)
+ * RETURN:        the token and yylval set appropriately.
  * SIDE EFFECTS:  input is taken from the input stream.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 2/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 2/88         Initial Revision
  *
  ***********************************************************************/
 int yystdlex(YYSTYPE* yylval, ...)
@@ -2452,7 +2208,7 @@ again:
             /*
              * '&' characters are ignored completely. This allows for the MASM
              * string equate substitution semantics:
-             *  % equate_name&biffy	...
+             *  % equate_name&biffy     ...
              * to work without error.
              */
             goto again;
@@ -2898,7 +2654,7 @@ again:
 
             opp = isReserved(yytext, cp - yytext);
 
-            if ((opp != (const OpCode*)NULL) && !noSymTrans)
+            if (opp && !noSymTrans)
             {
                 /*
                  * First handle any special processing the opcode requires.
@@ -3220,21 +2976,21 @@ again:
 }
 
 /***********************************************************************
- *				yyreadstring
+ *                              yyreadstring
  ***********************************************************************
- * SYNOPSIS:	    Read a string literal
- * CALLED BY:	    yylex (<, {, ' and " cases)
- * RETURN:	    Token to return
+ * SYNOPSIS:        Read a string literal
+ * CALLED BY:       yylex (<, {, ' and " cases)
+ * RETURN:          Token to return
  * SIDE EFFECTS:    yylval->string is set to the string read, dynamically
- *	    	    allocated. findOpcode removed from the list of procedures
- *	    	    tried.
+ *                  allocated. findOpcode removed from the list of procedures
+ *                  tried.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	3/31/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   3/31/89         Initial Revision
  *
  ***********************************************************************/
 static int yyreadstring(char open, /* If matched, ignore next close */
@@ -3301,7 +3057,7 @@ static int yyreadstring(char open, /* If matched, ignore next close */
             /*
              * Allow a newline to terminate the string, but don't
              * swallow the thing. Since MASM accepts things like
-             *	MACEXEC <.....\n
+             *  MACEXEC <.....\n
              * we don't give a warning should this happen in a <> string,
              * but otherwise we do....just to be safe :)
              */
@@ -3488,19 +3244,19 @@ static int yyreadstring(char open, /* If matched, ignore next close */
 }
 
 /***********************************************************************
- *				yystdwrap
+ *                              yystdwrap
  ***********************************************************************
- * SYNOPSIS:	  Handle an end-of-file on the current file.
- * CALLED BY:	  yylex when 0 returned from input
- * RETURN:	  FALSE if shouldn't wrap it up.
+ * SYNOPSIS:      Handle an end-of-file on the current file.
+ * CALLED BY:     yylex when 0 returned from input
+ * RETURN:        FALSE if shouldn't wrap it up.
  * SIDE EFFECTS:  curFile is freed and adjusted
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 2/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 2/88         Initial Revision
  *
  ***********************************************************************/
 int yystdwrap(void)
@@ -3596,19 +3352,19 @@ int yystdwrap(void)
 }
 
 /***********************************************************************
- *				Scan_Init
+ *                              Scan_Init
  ***********************************************************************
- * SYNOPSIS:	  Initialize the lexical scanner
- * CALLED BY:	  main
- * RETURN:	  Nothing
+ * SYNOPSIS:      Initialize the lexical scanner
+ * CALLED BY:     main
+ * RETURN:        Nothing
  * SIDE EFFECTS:  Many and sundry
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
 void Scan_Init(void)
@@ -3627,20 +3383,20 @@ void Scan_Init(void)
 }
 
 /***********************************************************************
- *				yyflush
+ *                              yyflush
  ***********************************************************************
- * SYNOPSIS:	  Flush to the end of the current line
- * CALLED BY:	  yyparse (opcode), yylex (comment)
- * RETURN:	  nothing
+ * SYNOPSIS:      Flush to the end of the current line
+ * CALLED BY:     yyparse (opcode), yylex (comment)
+ * RETURN:        nothing
  * SIDE EFFECTS:  Input is discarded to the next newline or the end of
- *	    	  the file and a newline pushed back into the stream.
+ *                the file and a newline pushed back into the stream.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
 void yyflush(void)
@@ -3655,20 +3411,20 @@ void yyflush(void)
 }
 
 /***********************************************************************
- *				yycreatelocals
+ *                              yycreatelocals
  ***********************************************************************
- * SYNOPSIS:	    Create maps for the local labels in this macro block
- * CALLED BY:	    yystartmacro, yyrept, yyirp, yyirpc
- * RETURN:	    Nothing
+ * SYNOPSIS:        Create maps for the local labels in this macro block
+ * CALLED BY:       yystartmacro, yyrept, yyirp, yyirpc
+ * RETURN:          Nothing
  * SIDE EFFECTS:    maps[numMaps-numLocals..numMaps-1] point to MASM-
- *	    	    style local labels.
+ *                  style local labels.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	4/24/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   4/24/89         Initial Revision
  *
  ***********************************************************************/
 static void yycreatelocals(int numLocals)
@@ -3687,21 +3443,21 @@ static void yycreatelocals(int numLocals)
 }
 
 /***********************************************************************
- *				yystartmacro
+ *                              yystartmacro
  ***********************************************************************
- * SYNOPSIS:	  Enter macro-processing mode.
- * CALLED BY:	  yyparse()
- * RETURN:	  Nothing
+ * SYNOPSIS:      Enter macro-processing mode.
+ * CALLED BY:     yyparse()
+ * RETURN:        Nothing
  * SIDE EFFECTS:
- *	    	  Any previously-active macro is pushed.
- *	    	  maps is set-up with the passed arguments.
+ *                Any previously-active macro is pushed.
+ *                maps is set-up with the passed arguments.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/31/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/31/88         Initial Revision
  *
  ***********************************************************************/
 void yystartmacro(Symbol* which, /* Macro to interpolate */
@@ -3896,31 +3652,31 @@ void yystartmacro(Symbol* which, /* Macro to interpolate */
 }
 
 /***********************************************************************
- *				ustrcmp
+ *                              ustrcmp
  ***********************************************************************
- * SYNOPSIS:	  Perform an unsigned (case-insensitive) string comparison
- * CALLED BY:	  yylex
- * RETURN:	  <0 if s1 is less than s2, 0 if they're equal and >0 if
- *		  s1 is greater than s2. Upper- and lower-case letters are
- *	    	  equivalent in the comparison.
+ * SYNOPSIS:      Perform an unsigned (case-insensitive) string comparison
+ * CALLED BY:     yylex
+ * RETURN:        <0 if s1 is less than s2, 0 if they're equal and >0 if
+ *                s1 is greater than s2. Upper- and lower-case letters are
+ *                equivalent in the comparison.
  *
  * SIDE EFFECTS:  None.
  *
  * STRATEGY:
- *	Subtract each character in s1 from its corresponding character
- *	in s2 in turn. Save that difference in case the strings are unequal.
+ *      Subtract each character in s1 from its corresponding character
+ *      in s2 in turn. Save that difference in case the strings are unequal.
  *
- *	If the characters are different, and the one that might be upper case
- *	actually is a letter, map that upper-case letter to lower case and
- *	subtract again (if the difference is < 0, *s1 must come before *s2 in
- *	the character set and vice versa if the difference is > 0).
+ *      If the characters are different, and the one that might be upper case
+ *      actually is a letter, map that upper-case letter to lower case and
+ *      subtract again (if the difference is < 0, *s1 must come before *s2 in
+ *      the character set and vice versa if the difference is > 0).
  *
- *	If the characters are still different, return the original difference.
+ *      If the characters are still different, return the original difference.
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/27/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/27/88         Initial Revision
  *
  ***********************************************************************/
 int ustrcmp(char* s1, char* s2)
@@ -3954,21 +3710,21 @@ int ustrcmp(char* s1, char* s2)
 }
 
 /***********************************************************************
- *				yyreadmacrobody
+ *                              yyreadmacrobody
  ***********************************************************************
- * SYNOPSIS:	  Read the body of a macro into a chain of MBlk and
- *	    	  MArg structures.
- * CALLED BY:	  yyreadmacro, yyrepeat, yyirp, yyirpc.
- * RETURN:	  A pointer to the head of the chain.
+ * SYNOPSIS:      Read the body of a macro into a chain of MBlk and
+ *                MArg structures.
+ * CALLED BY:     yyreadmacro, yyrepeat, yyirp, yyirpc.
+ * RETURN:        A pointer to the head of the chain.
  * SIDE EFFECTS:  Text is consumed from the input stream.
  *
  * STRATEGY:
  *
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
 static MBlk* yyreadmacrobody(
@@ -4460,20 +4216,20 @@ static MBlk* yyreadmacrobody(
 }
 
 /***********************************************************************
- *				yyreadmacro
+ *                              yyreadmacro
  ***********************************************************************
- * SYNOPSIS:	    Read a macro from the input, discarding it all if
- *	    	    ignore is set.
- * CALLED BY:	    yyparse
- * RETURN:	    yylval->macro.{numLocals,numArgs,text} filled in
+ * SYNOPSIS:        Read a macro from the input, discarding it all if
+ *                  ignore is set.
+ * CALLED BY:       yyparse
+ * RETURN:          yylval->macro.{numLocals,numArgs,text} filled in
  * SIDE EFFECTS:    MBlks are allocated if ignore is FALSE
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 1/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 1/88         Initial Revision
  *
  ***********************************************************************/
 static void yyreadmacro(YYSTYPE* yylval)
@@ -4637,19 +4393,19 @@ done:
 }
 
 /***********************************************************************
- *				yyfreemaps
+ *                              yyfreemaps
  ***********************************************************************
- * SYNOPSIS:	  Free the argument maps and their values
- * CALLED BY:	  input()
- * RETURN:	  Nothing
+ * SYNOPSIS:      Free the argument maps and their values
+ * CALLED BY:     input()
+ * RETURN:        Nothing
  * SIDE EFFECTS:  See above.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 1/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 1/88         Initial Revision
  *
  ***********************************************************************/
 static void yyfreemaps()
@@ -4674,25 +4430,25 @@ static void yyfreemaps()
 }
 
 /***********************************************************************
- *				yyrepeat
+ *                              yyrepeat
  ***********************************************************************
- * SYNOPSIS:	  Repeat a set of statements
- * CALLED BY:	  yyparse when REPT seen
- * RETURN:	  Nothing
+ * SYNOPSIS:      Repeat a set of statements
+ * CALLED BY:     yyparse when REPT seen
+ * RETURN:        Nothing
  * SIDE EFFECTS:  The text is pushed as a macro the number of times
- *		  indicated.
+ *                indicated.
  *
  * STRATEGY:
- *	We first read the text to be repeated by calling yyreadmacrobody
- *	then perform n PushMacro()'s of the returned text.
+ *      We first read the text to be repeated by calling yyreadmacrobody
+ *      then perform n PushMacro()'s of the returned text.
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
-void yyrepeat(n) int n; /* Number of times to repeat */
+void yyrepeat(int n) /* Number of times to repeat */
 {
     MBlk* text;
     int numLocal;
@@ -4739,25 +4495,25 @@ void yyrepeat(n) int n; /* Number of times to repeat */
 }
 
 /***********************************************************************
- *				yyirp
+ *                              yyirp
  ***********************************************************************
- * SYNOPSIS:	  Repeat the following text the number of times indicated
- *	    	  by the argument list.
- * CALLED BY:	  yyparse when IRP is seen
- * RETURN:	  Nothing
+ * SYNOPSIS:      Repeat the following text the number of times indicated
+ *                by the argument list.
+ * CALLED BY:     yyparse when IRP is seen
+ * RETURN:        Nothing
  * SIDE EFFECTS:  The text is interpolated one or more times.
  *
  * STRATEGY:
- *	Read the macro text into a chain of MBlk's.
- *	Build up a stack of the arguments in the argument list.
- *	For each item in the argument list, starting at the end,
- *	    PushMacro to the read text
- *	    create 1-item maps array with the argument
+ *      Read the macro text into a chain of MBlk's.
+ *      Build up a stack of the arguments in the argument list.
+ *      For each item in the argument list, starting at the end,
+ *          PushMacro to the read text
+ *          create 1-item maps array with the argument
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
 void yyirp(char* paramName, /* The dummy-parameter name to use */
@@ -4926,25 +4682,25 @@ void yyirp(char* paramName, /* The dummy-parameter name to use */
 }
 
 /***********************************************************************
- *				yyirpc
+ *                              yyirpc
  ***********************************************************************
- * SYNOPSIS:	  Repeat the following text the number of times indicated
- *	    	  by the argument list.
- * CALLED BY:	  yyparse when IRPC is seen
- * RETURN:	  Nothing
+ * SYNOPSIS:      Repeat the following text the number of times indicated
+ *                by the argument list.
+ * CALLED BY:     yyparse when IRPC is seen
+ * RETURN:        Nothing
  * SIDE EFFECTS:  The text is interpolated one or more times.
  *
  * STRATEGY:
- *	Read the macro text into a chain of MBlk's.
- *	Build up a stack of the arguments in the argument list.
- *	For each item in the argument list, starting at the end,
- *	    PushMacro to the read text
- *	    create 1-item maps array with the argument
+ *      Read the macro text into a chain of MBlk's.
+ *      Build up a stack of the arguments in the argument list.
+ *      For each item in the argument list, starting at the end,
+ *          PushMacro to the read text
+ *          create 1-item maps array with the argument
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	9/ 6/88		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   9/ 6/88         Initial Revision
  *
  ***********************************************************************/
 void yyirpc(char* paramName, /* The dummy-parameter name to use */
@@ -5009,21 +4765,21 @@ void yyirpc(char* paramName, /* The dummy-parameter name to use */
 #undef MAX_HASH_VALUE
 
 /***********************************************************************
- *				Scan_ToEndif
+ *                              Scan_ToEndif
  ***********************************************************************
- * SYNOPSIS:	    Skip to the ENDIF (or ELSE if orElse is TRUE)
- *		    corresponding to this IF.
- * CALLED BY:	    HandleIF on failed conditional
- * RETURN:	    Nothing
+ * SYNOPSIS:        Skip to the ENDIF (or ELSE if orElse is TRUE)
+ *                  corresponding to this IF.
+ * CALLED BY:       HandleIF on failed conditional
+ * RETURN:          Nothing
  * SIDE EFFECTS:    Characters are discarded. The terminating token is
- *	    	    pushed back into the input stream.
+ *                  pushed back into the input stream.
  *
  * STRATEGY:
  *
  * REVISION HISTORY:
- *	Name	Date		Description
- *	----	----		-----------
- *	ardeb	8/29/89		Initial Revision
+ *      Name    Date            Description
+ *      ----    ----            -----------
+ *      ardeb   8/29/89         Initial Revision
  *
  ***********************************************************************/
 void Scan_ToEndif(int orElse)
@@ -5176,13 +4932,13 @@ void Scan_ToEndif(int orElse)
                 {
                     ScanComment();
 #if 0
-		    /*
-		     * ScanComment() pushes the newline back into the input
-		     * stream, so this is superfluous.
-		     */
-		    if (!(wasmacro = inmacro)) {
-			yynewline();
-		    }
+                    /*
+                     * ScanComment() pushes the newline back into the input
+                     * stream, so this is superfluous.
+                     */
+                    if (!(wasmacro = inmacro)) {
+                        yynewline();
+                    }
 #else
                     wasmacro = inmacro;
 #endif
@@ -5304,3 +5060,6 @@ void Scan_ToEndif(int orElse)
  * c-label-offset: -4
  * end:
  */
+
+// vim: sw=8 ts=8 et
+

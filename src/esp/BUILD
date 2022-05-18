@@ -76,7 +76,7 @@ cc_binary(
 		":dword.h",
 		":model.h",
 	],
-	defines = ["YYDEBUG=1"],
+	defines = ["YYDEBUG=1", "LEXDEBUG=1"],
 	copts = [
 		"-Wno-unused-value",
 		"-Wno-unused-but-set-variable",

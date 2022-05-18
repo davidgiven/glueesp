@@ -259,4 +259,8 @@ extern void Parse_FileChange(int entry);
 extern int Parse_CheckClosure(int* okPtr, int checkSegStack);
 extern SymbolPtr curChunk;
 
+extern void yyrepeat(int n);
+extern void yyirp(char* paramName, char* args);
+extern void yyirpc(char* paramName, char* args);
+
 #endif /* _SCAN_H_ */

@@ -5490,7 +5490,7 @@ op              : RET
                             }
                         }
                         (void)Code_Ret(&dot, 0, 1, arg, 
-                                       (Expr *)!Sym_IsNear(curProc),
+                                       (Expr *)(uintptr_t)!Sym_IsNear(curProc),
                                        (Opaque)$1);
                     } else {
                         yywarning("RET outside of procedure -- defaulting to RETF");
@@ -5502,7 +5502,7 @@ op              : RET
                 {
                     if (curProc) {
                         (void)Code_Ret(&dot, 0, 1, &expr1,
-                                       (Expr *)!Sym_IsNear(curProc),
+                                       (Expr *)(uintptr_t)!Sym_IsNear(curProc),
                                        (Opaque)$1);
                     } else {
                         yywarning("RET outside of procedure -- defaulting to RETF");

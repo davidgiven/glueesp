@@ -31,7 +31,7 @@ et	etype 	word, 11, 3
 e1	enum	et, 13	; 13
 e2	enum	et	; 16
 
-struct	struc
+struczt	struc
     q	dw	?
     r	byte
     s	sptr.struct
