@@ -9050,7 +9050,7 @@ FixResult Code_Ret(int* addrPtr, /* IN/OUT: Address of instruction start */
 {
     ExprResult res1;
     OpCode* op = (OpCode*)data;
-    byte ibuf[2]; /* opcode, count*/
+    byte ibuf[3]; /* opcode, count*/
     byte* ip = ibuf;
     byte opcode;
     byte stat1;
