@@ -21,16 +21,12 @@
  *	Program to print out the contents of an object file.
  *
  ***********************************************************************/
-#ifndef lint
-static char* rcsid = "$Id: printobj.c,v 3.25 95/02/17 16:27:30 adam Exp $";
-#endif lint
 
-#include <config.h>
-
-#include <st.h>
-#include <objfmt.h>
-#include <objSwap.h>
-#include <stdio.h>
+#include "config.h"
+#include "st.h"
+#include "objfmt.h"
+#include "objSwap.h"
+#include "gprintf.h"
 #include <ctype.h>
 
 int debug = 0;
@@ -79,7 +75,7 @@ void DumpBlock(VMHandle file, VMBlockHandle block)
     MemHandle mem;
     int i;
 
-    if (block == NULL)
+    if (block == NULLH)
     {
         gprintf("\tNONE\n");
         return;
@@ -199,7 +195,7 @@ void DumpSyms(VMHandle file, VMBlockHandle block, int segOff)
     MemHandle mem;
     VMBlockHandle next;
 
-    while (block != NULL)
+    while (block != NULLH)
     {
         hdr = (ObjSymHeader*)VMLock(file, block, &mem);
         MemInfo(mem, (genptr*)NULL, &size);
@@ -559,7 +555,7 @@ void DumpRel(VMHandle file, VMBlockHandle block, ObjHeader* hdr)
     MemHandle mem;
     int n;
 
-    while (block != NULL)
+    while (block != NULLH)
     {
         orh = (ObjRelHeader*)VMLock(file, block, &mem);
 
@@ -748,7 +744,7 @@ void DumpSourceMap(VMHandle file, VMBlockHandle header, ObjHeader* hdr)
     VMUnlock(file, header);
 }
 
-volatile void main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     short status;
     VMBlockHandle map;
@@ -825,7 +821,7 @@ volatile void main(int argc, char** argv)
         hdr->rev.change,
         hdr->rev.internal);
 
-    if (hdr->entry.frame != NULL)
+    if (hdr->entry.frame != NULLH)
     {
         ID frame;
         ObjSym* sym;

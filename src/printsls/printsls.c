@@ -22,11 +22,12 @@
  *
  ***********************************************************************/
 
-#include "esp.h"
+#include "config.h"
 
 #include "st.h"
 #include "objfmt.h"
 #include "objSwap.h"
+#include "gprintf.h"
 #include <ctype.h>
 
 int debug = 0;
@@ -68,8 +69,7 @@ const char* registers[] = {"ax",
     "ch",
     "dh"};
 
-void DumpSyms(
-    VMHandle file, VMBlockHandle block, const char* segName, int segOff)
+void DumpSyms(VMHandle file, VMBlockHandle block, ID segName, int segOff)
 {
     ObjSymHeader* hdr;
     ObjSym* sym;
@@ -121,7 +121,7 @@ void DumpSyms(
     }
 }
 
-volatile void main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     short status;
     VMBlockHandle map;
@@ -198,7 +198,7 @@ volatile void main(int argc, char** argv)
         hdr->rev.change,
         hdr->rev.internal);
 
-    if (hdr->entry.frame != NULL)
+    if (hdr->entry.frame != NULLH)
     {
         ID frame;
         ObjSym* sym;
